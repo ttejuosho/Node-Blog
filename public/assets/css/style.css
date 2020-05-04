@@ -1,0 +1,17 @@
+.inputIconSpan {
+  position: absolute;
+  border: none;
+  top: 8px;
+  left: 6px;
+}
+
+.customFormInput {
+  padding-left: 3rem !important;
+  height: 4em;
+  background-color: #9279797a;
+  border: none;
+}
+
+.ck-reset.ck-editor{
+  color: black;
+}

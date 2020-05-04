@@ -7,6 +7,18 @@ module.exports = (sequelize, DataTypes) => {
     },
     name: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    tagline: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    about: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
     emailAddress: {
@@ -16,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
     resetPasswordToken: {
       type: DataTypes.STRING,
@@ -38,7 +50,25 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    twitter: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    facebook: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    linkedIn: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    }
   });
+
+  User.associate = (models) => {
+    User.hasMany(models.Post, {
+      onDelete: 'cascade',
+    });
+  };
 
   return User;
 };

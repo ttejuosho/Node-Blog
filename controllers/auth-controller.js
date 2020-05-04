@@ -69,7 +69,7 @@ exports.signup = (req, res, next) => {
           req.session.globalUser["emailAddress"] = user.emailAddress;
           req.session.globalUser["phoneNumber"] = user.phoneNumber;
           req.session.globalUser["profileImage"] = user.profileImage;
-          res.redirect("/");
+          res.redirect("/newPost");
         });
       })(req, res, next);
     }
@@ -105,7 +105,30 @@ exports.signin = (req, res, next) => {
       req.session.globalUser["emailAddress"] = user.emailAddress;
       req.session.globalUser["phoneNumber"] = user.phoneNumber;
       req.session.globalUser["profileImage"] = user.profileImage;
-      return res.redirect("/");
+      return res.redirect("/newPost");
     });
   })(req, res, next);
+};
+
+exports.signout = function(req, res) {
+  req.session.destroy(function(err) {
+    res.redirect('/signin');
+  });
+};
+
+// prints out the user info from the session id
+exports.sessionUserId = function(req, res) {
+  // body of the session
+  const sessionUser = req.session;
+  // console.log the id of the user
+  console.log(sessionUser.cookie, ' ======Cookie=====');
+  console.log(sessionUser.passport.user, ' ======Logged in User UUID=====');
+
+  db.User.findAll({
+    where: {
+      userId: req.session.passport.user,
+    },
+  }).then(function(dbUser) {
+    res.json(dbUser);
+  });
 };
