@@ -1,14 +1,14 @@
-const multer = require('multer');
-const path = require('path');
+const multer = require("multer");
+const path = require("path");
 
 // Set The Storage Engine
 const storage = multer.diskStorage({
-  destination: 'uploads/images/',
-  filename: function(req, file, cb) {
+  destination: "uploads/images/",
+  filename: function (req, file, cb) {
     // eslint-disable-next-line max-len
     cb(
-        null,
-        file.fieldname + '-' + Date.now() + path.extname(file.originalname)
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
     );
   },
 });
@@ -16,11 +16,14 @@ const storage = multer.diskStorage({
 // Init Upload
 const upload = multer({
   storage: storage,
-  limits: {fileSize: 1000000},
-  fileFilter: function(req, file, cb) {
+  limits: { fileSize: 1000000 },
+  fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   },
-}).single('profileImage');
+}).fields([
+  { name: "profileImage", maxCount: 1 },
+  { name: "postImage", maxCount: 1 },
+]);
 
 // Check File Type
 // eslint-disable-next-line require-jsdoc
@@ -35,7 +38,7 @@ function checkFileType(file, cb) {
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb('Error: Images Only!');
+    cb("Error: Images Only!");
   }
 }
 

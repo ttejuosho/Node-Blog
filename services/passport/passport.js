@@ -3,6 +3,7 @@
 // load bcrypt
 const bCrypt = require('bcrypt-nodejs');
 const db = require('../../models');
+const sendEmail = require('../email/email');
 
 module.exports = function(passport, user) {
   const User = user;
@@ -62,26 +63,13 @@ module.exports = function(passport, user) {
             return done(null, newUser);
           }
         }).then(()=>{
-          db.Contact.findOne({
-            where: {email: email},
-          }).then((dbContact) => {
-            if (dbContact == null) {
-              db.Contact.create({
-                firstName: req.body.name.split(' ')[0],
-                lastName: req.body.name.split(' ')[1],
-                email: email,
-              }).then(()=>{
-                const emailBody = `
-                <p>Hello ${req.body.name.split(' ')[0]},</p>
-                <p style="color: black;">Your account is set and you're all good to go. Click <a href="https://surveneer.herokuapp.com/">here</a> to sign in to create your first survey.</p>
-                <p> <span style="font-size: 1rem;color: black;"><strong>The Surveneer Team</strong></span></p>
-                `;
-                sendEmail(emailBody, 'Welcome to SurvEvEEr !', email);
-              }).catch((err) => {
-                return res.render('error', err);
-              });
-            }
-          });
+          //Send Confirmation Email to new user
+          const emailBody = `
+          <p>Hello ${req.body.name.split(' ')[0]},</p>
+          <p style="color: black;">Your account is set and you're all good to go. Click <a href="https://surveneer.herokuapp.com/">here</a> to sign in to create your first survey.</p>
+          <p> <span style="font-size: 1rem;color: black;"><strong>The TaiBlog</strong></span></p>
+          `;
+          sendEmail(emailBody, 'Welcome to T-Log !', email);
         });
       }
     });
