@@ -1,0 +1,25 @@
+<form class="form-signin" method="POST" action="/saveMoreInfo">
+    <img class="mb-4" src="/assets/img/blogetB3.png" alt="bloget-logo" width="110" height="100">
+
+    <h1 class="h3 mb-3 font-weight-normal">Welcome to Bloget</h1>
+
+    <input type="hidden" name="emailAddress" id="emailAddress" value="{{emailAddress}}">
+    <input type="hidden" name="name" id="name" value="{{name}}">
+    <input type="hidden" name="username" id="username" value="{{username}}">
+    <input type="hidden" name="userId" id="userId" value="{{userId}}">
+
+
+    <label for="Profile Image" class="sr-only">Profile Image</label>
+    <input type="file" id="profileImage" name="profileImage" class="form-control" placeholder="Profile Image"
+        required="" autofocus="">
+
+    <label for="Tagline" class="sr-only">Tag Line</label>
+    <input type="text" id="tagline" name="tagline" class="form-control" placeholder="Tag Line" required="" autofocus="">
+
+    <label for="About" class="sr-only">About Me</label>
+    <textarea type="text" id="about" name="about" class="form-control" placeholder="About" rows="3"></textarea>
+
+    <button class="btn btn-lg btn-dark btn-block mt-3" type="submit">Complete Sign up</button>
+
+    <p class="mt-5 mb-3 text-muted">© Bloget 2020</p>
+</form>

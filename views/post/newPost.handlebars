@@ -1,0 +1,71 @@
+<div class="page-header page-header-small" filter-color="orange">
+    <div class="page-header-image" data-parallax="true" style="background-image: url('../assets/img/bg5.jpg');">
+    </div>
+    <div class="container">
+        <div class="content-center">
+            <h3 class="title">New Post</h3>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="row content-center">
+            <div class="card card-login card-plain">
+                <form class="form" method="POST" action="/newpost" enctype="multipart/form-data">
+                    <div class="content">
+
+                        <div class="col-md-12 mb-3 p-0">
+                            <span class="input-group-addon inputIconSpan">
+                                <i class="now-ui-icons users_circle-08"></i>
+                            </span>
+                            <input type="text" class="form-control customFormInput" name="postTitle" id="postTitle" placeholder="Post Title" required>
+                            <div class="invalid-feedback text-left pl-2">Post Title is required.</div>
+                        </div>
+
+                        <div class="col-md-12 mb-3 p-0">
+                            <span class="input-group-addon inputIconSpan">
+                                <i class="now-ui-icons users_circle-08"></i>
+                            </span>
+                            <input type="text" class="form-control customFormInput" name="postDescription" id="postDescription" placeholder="Post Description" required>
+                            <div class="invalid-feedback text-left pl-2">Post Description is required.</div>
+                        </div>
+
+                        <div class="input-group form-group-no-border input-lg">
+                            <span class="input-group-addon">
+                                <i class="now-ui-icons design_image"></i>
+                            </span>
+                            <input type="file" class="form-control" placeholder="Choose Image" name="postImage" id="postImage" />
+                        </div>
+
+                        <textarea id="postBody" name="postBody"></textarea>
+
+                        <div class="footer text-center">
+                            <div class="pull-left">
+                                <input type="submit" value="Save Draft" name="action" class="btn btn-primary btn-round btn-sm btn-block" />
+                            </div>
+                            <div class="pull-right">
+                                <button type="submit" class="btn btn-primary btn-round btn-sm btn-block">Save Post</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    ClassicEditor
+        .create(document.querySelector('#postBody'), {
+            //toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote' ]
+        })
+        .then(editor => {
+            window.editor = editor;
+        })
+        .catch(err => {
+            console.error(err.stack);
+        });
+</script>

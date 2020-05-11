@@ -1,5 +1,5 @@
 const db = require('../models');
-const upload = require('../services/utils/utils.js');
+const upload = require('../services/Utils/localUpload.js');
 
 // Render new home page
 exports.getHomePage = (req, res) => {
@@ -53,7 +53,7 @@ exports.getHomePage = (req, res) => {
       where: {
         postId: req.params.postId
       },
-      include: [{model: db.User, as: 'User', attributes: ['userId', 'username', 'name', 'twitter', 'facebook', 'linkedin'] }]
+      include: [{model: db.User, as: 'User', attributes: ['userId', 'username', 'name', 'profileImage'] }]
     }).then((dbPost)=>{
       if (dbPost !== null) {
         var hbsObject = {
@@ -68,10 +68,7 @@ exports.getHomePage = (req, res) => {
           userId: dbPost.dataValues.UserUserId,
           createdAt: dbPost.dataValues.createdAt,
           username: dbPost.User.dataValues.username,
-          name: dbPost.User.dataValues.name,
-          twitter: dbPost.User.dataValues.twitter,
-          facebook: dbPost.User.dataValues.facebook,
-          linkedin: dbPost.User.dataValues.linkedin
+          name: dbPost.User.dataValues.name
         }
         console.log(hbsObject);
         return res.render('post/viewPost', hbsObject );

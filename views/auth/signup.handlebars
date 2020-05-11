@@ -1,57 +1,77 @@
-<div class="page-header-image" style="background-image:url(/assets/img/login.jpg)"></div>
+{{!-- <div class="page-header-image" style="background-image:url(/assets/img/login.jpg)"></div> --}}
 <div class="container">
-    <div class="col-md-4 content-center">
+    <div class="col-md-4 prelogin content-center">
         <div class="card card-login card-plain">
-            <form class="form needs-validation" method="/signup" action="POST" enctype="multipart/form-data" novalidate>
+            <form class="form" method="POST" action="/signup" enctype="multipart/form-data">
                 <div class="header header-primary text-center">
                     <div class="logo-container">
                         <img src="/assets/img/now-logo.png" alt="">
                     </div>
                 </div>
                 <div class="content">
-                    <div class="input-group form-group-no-border input-lg">
-                        <span class="input-group-addon">
+                    <div class="col-md-12 mb-3 p-0">
+                        <span class="input-group-addon inputIconSpan">
                             <i class="now-ui-icons users_circle-08"></i>
                         </span>
-                        <input type="text" class="form-control" placeholder="Name" name="name" id="name" required>
-                        {{!-- <div class="invalid-feedback">Please enter your first & last names.</div> --}}
+                        <input type="text" class="form-control customFormInput" name="name" id="name" placeholder="Name"
+                            required>
+                        <div class="invalid-feedback text-left pl-2">Name is required.</div>
                     </div>
-                    <div class="input-group form-group-no-border input-lg">
-                        <span class="input-group-addon">
+
+                    <div class="col-md-12 mb-3 p-0">
+                        <span class="input-group-addon inputIconSpan">
+                            <i class="now-ui-icons users_circle-08"></i>
+                        </span>
+                        <input type="text" class="form-control customFormInput" name="username" id="username" placeholder="Username"
+                            required>
+                        <div class="invalid-feedback text-left pl-2">Username is required.</div>
+                    </div>
+
+                    <div class="col-md-12 mb-3 p-0">
+                        <span class="input-group-addon inputIconSpan">
                             <i class="now-ui-icons ui-1_email-85"></i>
                         </span>
-                        <input type="text" class="form-control" placeholder="Email Address" name="emailAddress" id="emailAddress" required>
-                        <div class="invalid-feedback">Email address is required.</div>
+                        <input type="text" class="form-control customFormInput" name="emailAddress" id="emailAddress"
+                            placeholder="Email Address" required>
+                        <div class="invalid-feedback text-left pl-2">Email Address is required.</div>
                     </div>
-                    <div class="input-group form-group-no-border input-lg">
-                        <span class="input-group-addon">
+
+                    <div class="col-md-12 mb-3 p-0">
+                        <span class="input-group-addon inputIconSpan">
                             <i class="now-ui-icons tech_mobile"></i>
                         </span>
-                        <input type="text" class="form-control" placeholder="Phone" name="phoneNumber" id="phoneNumber" required>
-                        <div class="invalid-feedback">Phone number is required.</div>
+                        <input type="text" class="form-control customFormInput" name="phoneNumber" id="phoneNumber"
+                            placeholder="Phone Number" required>
+                        <div class="invalid-feedback text-left pl-2">Phone Number is required.</div>
                     </div>
-                    <div class="input-group form-group-no-border input-lg">
-                        <span class="input-group-addon">
+
+                    <div class="col-md-12 mb-3 p-0">
+                        <span class="input-group-addon inputIconSpan">
                             <i class="now-ui-icons ui-1_lock-circle-open"></i>
                         </span>
-                        <input type="text" class="form-control" placeholder="Password" name="password" id="password" autocomplete="off" required>
-                        <div class="invalid-feedback">Password is required.</div>
+                        <input type="password" class="form-control customFormInput" name="password" id="password"
+                            placeholder="Password" autocomplete="off" required>
+                        <div class="invalid-feedback text-left pl-2">Password is required.</div>
                     </div>
-                    <div class="input-group form-group-no-border input-lg">
-                        <span class="input-group-addon">
+
+                    <div class="col-md-12 mb-3 p-0">
+                        <span class="input-group-addon inputIconSpan">
                             <i class="now-ui-icons ui-1_lock-circle-open"></i>
                         </span>
-                        <input type="text" class="form-control" placeholder="Confirm Password" name="confirmPassword" id="confirmPassword" autocomplete="off" required>
-                        <div class="invalid-feedback">Please confirm your password.</div>
+                        <input type="password" class="form-control customFormInput" name="confirmPassword"
+                            id="confirmPassword" placeholder="Confirm Password" autocomplete="off" required>
+                        <div class="invalid-feedback text-left pl-2">Please confirm your password.</div>
                     </div>
+
                     <div class="input-group form-group-no-border input-lg">
                         <span class="input-group-addon">
                             <i class="now-ui-icons design_image"></i>
                         </span>
-                        <input type="file" class="form-control" placeholder="Choose Image" name="profileImage" id="profileImage" />
+                        <input type="file" class="form-control" placeholder="Choose Image" name="profileImage"
+                            id="profileImage" />
                     </div>
                 </div>
-                <div class="footer text-center">
+                <div class="footer text-center pt-0">
                     <button type="submit" class="btn btn-primary btn-round btn-lg btn-block">Get Started</button>
                 </div>
                 <div class="pull-left">
@@ -66,25 +86,5 @@
                 </div>
             </form>
         </div>
-    </div>
-</div>
 
-<script>
-      (function() {
-    'use strict';
-    window.addEventListener('load', function() {
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-      const forms = document.getElementsByClassName('needs-validation');
-      // Loop over them and prevent submission
-      const validation = Array.prototype.filter.call(forms, function(form) {
-        form.addEventListener('submit', function(event) {
-          if (form.checkValidity() === false) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-          form.classList.add('was-validated');
-        }, false);
-      });
-    }, false);
-  })();
-</script>
+    </div>
