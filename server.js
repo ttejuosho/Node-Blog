@@ -12,6 +12,8 @@ const passport = require("passport");
 const session = require("express-session");
 const morgan = require("morgan");
 const moment = require("moment");
+const fs = require("fs")
+const aws = require("aws-sdk");
 require("dotenv").config();
 
 // cors setup
@@ -71,7 +73,7 @@ const hbs = exphbs.create({
       }
     },
   },
-  defaultLayout: "main",
+  defaultLayout: "mainn",
 });
 
 //app.engine("handlebars", exphbs({ defaultLayout: "main" }));
