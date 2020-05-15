@@ -1,115 +1,60 @@
-<div class="page-header page-header-small" filter-color="orange">
-    <div class="page-header-image" data-parallax="true" style="background-image: url('/assets/img/bg5.jpg');">
+<div class="row mt-3 mb-3">
+
+    <div class="col-5"><img class="img-fluid mx-auto profileImage" src="{{profileImage}}" /></div>
+
+    <div class="col-7">
+        <h3 class="display-4">{{name}}</h3>
+        <h6>@{{username}}</h6>
+        <p class="lead">{{tagline}}</p>
+        <p>{{about}}</p>
+        <p class="mt-5"> 
+            <span class="mr-2"> <a class="text-dark" href="https://www.facebook.com/{{facebook}}" target="_blank"><i class="fab fa-facebook fa-2x"></i></a></span> 
+            <span class="mr-2"> <a class="text-dark" href="https://www.linkedin.com/in/{{linkedIn}}" target="_blank"><i class="fab fa-linkedin fa-2x"></i></a></span> 
+            <span class="mr-2"> <a class="text-dark" href="https://www.twitter.com/{{twitter}}" target="_blank"><i class="fab fa-twitter fa-2x"></i></a></span>
+            <span class="mr-2"> <a class="text-dark" href="mailto:{{emailAddress}}"><i class="fas fa-envelope fa-2x"></i></a></span>
+        </p>
     </div>
-    <div class="container">
-        <div class="content-center">
-            <div class="photo-container">
-                <img src="/assets/img/ryan.jpg" alt="">
-            </div>
-            <h3 class="title">Ryan Scheinder</h3>
-            <p class="category">Photographer</p>
-            <div class="content">
-                <div class="social-description">
-                    <h2>26</h2>
-                    <p>Comments</p>
-                </div>
-                <div class="social-description">
-                    <h2>26</h2>
-                    <p>Comments</p>
-                </div>
-                <div class="social-description">
-                    <h2>48</h2>
-                    <p>Bookmarks</p>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>
-<div class="section">
-    <div class="container">
-        <div class="button-container">
-            <a href="#button" class="btn btn-primary btn-round btn-lg">Follow</a>
-            <a href="#button" class="btn btn-default btn-round btn-lg btn-icon" rel="tooltip"
-                title="Follow me on Twitter">
-                <i class="fa fa-twitter"></i>
-            </a>
-            <a href="#button" class="btn btn-default btn-round btn-lg btn-icon" rel="tooltip"
-                title="Follow me on Instagram">
-                <i class="fa fa-instagram"></i>
-            </a>
+<hr class="bloget-divider">
+
+<p class="display-4 font-weight-bold">Posts</p>
+
+  <div class="row mb-2">
+    <div class="col-md-12">
+      <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <strong class="d-inline-block mb-2 text-primary">World</strong>
+          <h3 class="mb-0">Featured post</h3>
+          <div class="mb-1 text-muted">Nov 12</div>
+          <p class="card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
+          <a href="#" class="stretched-link">Continue reading</a>
         </div>
-        <h3 class="title">About me</h3>
-        <h5 class="description">An artist of considerable range, Ryan — the name taken by Melbourne-raised,
-            Brooklyn-based Nick Murphy — writes, performs and records all of his own music, giving it a warm, intimate
-            feel with a solid groove structure. An artist of considerable range.</h5>
-        <div class="row">
-            <div class="col-md-6 ml-auto mr-auto">
-                <h4 class="title text-center">My Portfolio</h4>
-                <div class="nav-align-center">
-                    <ul class="nav nav-pills nav-pills-primary" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#profile" role="tablist">
-                                <i class="now-ui-icons design_image"></i>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#home" role="tablist">
-                                <i class="now-ui-icons location_world"></i>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#messages" role="tablist">
-                                <i class="now-ui-icons sport_user-run"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <!-- Tab panes -->
-            <div class="tab-content gallery">
-                <div class="tab-pane active" id="home" role="tabpanel">
-                    <div class="col-md-10 ml-auto mr-auto">
-                        <div class="row collections">
-                            <div class="col-md-6">
-                                <img src="/assets/img/bg1.jpg" alt="" class="img-raised">
-                                <img src="/assets/img/bg3.jpg" alt="" class="img-raised">
-                            </div>
-                            <div class="col-md-6">
-                                <img src="/assets/img/bg8.jpg" alt="" class="img-raised">
-                                <img src="/assets/img/bg7.jpg" alt="" class="img-raised">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="tab-pane" id="profile" role="tabpanel">
-                    <div class="col-md-10 ml-auto mr-auto">
-                        <div class="row collections">
-                            <div class="col-md-6">
-                                <img src="/assets/img/bg6.jpg" class="img-raised">
-                                <img src="/assets/img/bg11.jpg" alt="" class="img-raised">
-                            </div>
-                            <div class="col-md-6">
-                                <img src="/assets/img/bg7.jpg" alt="" class="img-raised">
-                                <img src="/assets/img/bg8.jpg" alt="" class="img-raised">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="tab-pane" id="messages" role="tabpanel">
-                    <div class="col-md-10 ml-auto mr-auto">
-                        <div class="row collections">
-                            <div class="col-md-6">
-                                <img src="/assets/img/bg3.jpg" alt="" class="img-raised">
-                                <img src="/assets/img/bg8.jpg" alt="" class="img-raised">
-                            </div>
-                            <div class="col-md-6">
-                                <img src="/assets/img/bg7.jpg" alt="" class="img-raised">
-                                <img src="/assets/img/bg6.jpg" class="img-raised">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="col-auto d-none d-lg-block">
+          <svg class="bd-placeholder-img" width="300" height="250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="38%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
         </div>
+      </div>
     </div>
-</div>
+  </div>
+
+{{#each Posts}}
+  <div class="row mb-2">
+    <div class="col-md-12">
+      <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
+          <h3 class="mb-0">{{postTitle}}</h3>
+          <div class="mb-1 text-muted">{{createdAt}}</div>
+          <p class="card-text mb-auto">{{postDescription}}</p>
+          <small class="form-text text-muted">{{viewCount}}</small>
+          <a href="/post/{{postId}}" class="stretched-link">Continue reading</a>
+        </div>
+        <div class="col-auto d-none d-lg-block">
+          <img src="{{postImage}}" style="height: 250px;" />
+        </div>
+      </div>
+    </div>
+  </div>
+  {{else}}
+  <p>This user has no posts.</p>
+{{/each}}

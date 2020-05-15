@@ -12,8 +12,6 @@ const passport = require("passport");
 const session = require("express-session");
 const morgan = require("morgan");
 const moment = require("moment");
-const fs = require("fs")
-const aws = require("aws-sdk");
 require("dotenv").config();
 
 // cors setup
@@ -73,17 +71,28 @@ const hbs = exphbs.create({
       }
     },
   },
-  defaultLayout: "mainn",
+  defaultLayout: "main"
 });
 
 //app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.engine('handlebars', hbs.engine);
 app.set("view engine", "handlebars");
 
-require("./routes/auth-api-routes")(app);
-require("./routes/blog-api-routes")(app);
+app.use((req, res, next) => {
+  // add this line to include winston logging uncomment next line to enable winston
+  // winston.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+  if (req.isAuthenticated) {
+    res.locals.isAuthenticated = req.isAuthenticated();
+  }
+  next();
+});
 
-require("./routes/blog-routes")(app);
+require("./routes/user-api-routes")(app);
+require("./routes/post-api-routes")(app);
+require("./routes/auth-api-routes")(app);
+
+require("./routes/user-routes")(app);
+require("./routes/post-routes")(app);
 require("./routes/auth-routes")(app);
 
 // load passport strategies

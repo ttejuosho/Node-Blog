@@ -4,9 +4,9 @@ module.exports = function(app) {
     app.get('/signin', authController.getSigninPage);
     app.get('/signup', authController.getSignupPage);
     app.post('/signin', authController.signin);
-    app.post('/signup', authController.signup);
+    //app.post('/signup', authController.signup);
     app.get('/signout', authController.signout);
-    app.get('/join', authController.getRegisterPage);
+    //app.get('/join', authController.getRegisterPage);
     app.post('/join', authController.join);
 
     app.post('/saveUserInfo', authController.saveUserInfo);

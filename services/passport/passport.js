@@ -53,7 +53,7 @@ module.exports = function(passport, user) {
           name: req.body.name,
           username: req.body.username,
           phoneNumber: req.body.phoneNumber,
-          //profileImage: req.file.location,
+          profileImage: req.file.location,
         };
 
         User.create(data).then(function(newUser, created) {

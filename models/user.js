@@ -63,6 +63,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
     }
   });
+  // {
+  //   defaultScope: {
+  //     attributes: { exclude: ['password'] },
+  //   }
+  // });
 
   User.associate = (models) => {
     User.hasMany(models.Post, {

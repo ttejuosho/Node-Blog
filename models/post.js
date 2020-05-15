@@ -7,9 +7,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       postTitle: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       postDescription: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      postCategory: {
         type: DataTypes.STRING,
         allowNull: false,
       },

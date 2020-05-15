@@ -1,8 +1,6 @@
 const db = require("../models");
 const passport = require("passport");
 const upload = require("../services/Utils/upload.js");
-const fs = require("fs");
-const AWS = require("aws-sdk");
 
 // Render Signin page
 exports.getSigninPage = (req, res) => {
@@ -12,12 +10,20 @@ exports.getSigninPage = (req, res) => {
   });
 };
 
+// Render Signup page
+exports.getSignupPage = (req, res) => {
+  return res.render("auth/signup", {
+    title: "Sign Up",
+    layout: "partials/prelogin",
+  });
+};
+
 exports.getRegisterPage = (req, res) => {
   return res.render("auth/getemail", {
     title: "Register",
     layout: "partials/prelogin",
   });
-}
+};
 
 exports.getUserInfoPage = (req, res) => {
   return res.render("auth/getUserInfo", {
@@ -29,107 +35,169 @@ exports.getUserInfoPage = (req, res) => {
 exports.join = (req, res) => {
   db.User.findOne({
     where: {
-      emailAddress: req.body.emailAddress
-    }
-  }).then((dbUser)=>{
-    if (dbUser === null){
-      res.render("auth/getUserInfo", { emailAddress: req.body.emailAddress, layout: "partials/prelogin" })
-    } else {
-      res.render("auth/signin", { error: "Email already exists" });
-    }
+      emailAddress: req.body.emailAddress,
+    },
   })
-}
+    .then((dbUser) => {
+      if (dbUser === null) {
+        res.render("auth/signup", {
+          emailAvailable: true,
+          emailAddress: req.body.emailAddress,
+          layout: "partials/prelogin",
+        });
+      } else {
+        res.render("auth/signup", {
+          error: "Email already exists",
+          layout: "partials/prelogin",
+        });
+      }
+    })
+    .catch((err) => {
+      res.render("error", { error: err });
+    });
+};
 
 exports.saveUserInfo = (req, res, next) => {
   db.User.findOne({
     where: {
-      emailAddress: req.body.emailAddress
-    }
-  }).then((dbUser)=>{
-    if (dbUser === null){
-      passport.authenticate("local-signup", (err, user, info) => {
-        if (err) {
-          return next(err); // will generate a 500 error
-        }
-        if (!user) {
-          const msg = {
-            error: "Sign Up Failed: Username already exists",
-            layout: "partials/prelogin",
-          };
-          return res.render("auth/signup", msg);
-        }
-        req.login(user, (signupErr) => {
-          if (signupErr) {
-            const msg = {
-              error: "Sign up Failed",
-              layout: "partials/prelogin",
-            };
-            return res.render("auth/signup", msg);
-          }
-    
-          res.render("auth/getMoreInfo", {
-            layout: "partials/prelogin",
-            userId: user.userId,
-            name: user.name,
-            username: user.username,
-            emailAddress: user.emailAddress
-          });
-        });
-      })(req, res, next);
-    } else {
-      res.render("auth/signin", { error: "Email already exists" });
-    }
+      username: req.body.username,
+    },
   })
-}
+    .then((dbUser) => {
+      if (dbUser === null) {
+        db.User.findOne({
+          where: {
+            emailAddress: req.body.emailAddress,
+          },
+        })
+          .then((dbUser) => {
+            if (dbUser === null) {
+              passport.authenticate("local-signup", (err, user, info) => {
+                if (err) {
+                  return next(err); // will generate a 500 error
+                }
+                if (!user) {
+                  const msg = {
+                    error: "Sign Up Failed: Username already exists",
+                    layout: "partials/prelogin",
+                  };
+                  return res.render("auth/signup", msg);
+                }
+                req.login(user, (signupErr) => {
+                  if (signupErr) {
+                    const msg = {
+                      error: "Sign up Failed",
+                      layout: "partials/prelogin",
+                    };
+                    return res.render("auth/signup", msg);
+                  }
+
+                  console.log(user.dataValues);
+
+                  req.session.globalUser = {};
+                  req.session.globalUser["userId"] = user.dataValues.userId;
+                  req.session.globalUser["name"] = user.dataValues.name;
+                  req.session.globalUser["username"] = user.dataValues.username;
+                  req.session.globalUser["emailAddress"] =
+                    user.dataValues.emailAddress;
+
+                  return res.render("auth/signup", {
+                    layout: "partials/prelogin",
+                    userInfoSaved: true,
+                    isLoggedIn: true,
+                    name: user.dataValues.name,
+                    username: user.dataValues.username,
+                    emailAddress: user.dataValues.emailAddress,
+                    userId: user.dataValues.userId,
+                    phoneNumber: req.body.phoneNumber,
+                  });
+                });
+              })(req, res, next);
+            } else {
+              res.render("auth/signin", { error: "Email already exists" });
+            }
+          })
+          .catch((err) => {
+            res.render("error", { error: err });
+          });
+      } else {
+        return res.render("auth/signup", {
+          emailAvailable: true,
+          error: "username is taken",
+          emailAddress: req.body.emailAddress,
+          name: req.body.name,
+          username: req.body.username,
+          phoneNumber: req.body.phoneNumber,
+        });
+      }
+    })
+    .catch((err) => {
+      res.render("error", { error: err });
+    });
+};
 
 exports.saveMoreInfo = (req, res) => {
-  const singleUpload = upload.single('profileImage');
+  const singleUpload = upload.single("profileImage");
   singleUpload(req, res, (err) => {
     if (err) {
-      return res.status(422).send({errors: [{title: 'Image Upload Error', detail: err.message}]});
+      return res.status(422).send({
+        errors: [{ title: "Image Upload Error", detail: err.message }],
+      });
     }
+
     db.User.findOne({
       where: {
         emailAddress: req.body.emailAddress,
-        username: req.body.username
-      }
-    }).then((dbUser)=>{ 
-      if (dbUser === null){
-        res.render("auth/signin", { error: "User not found" });
-      } else {
-        db.User.update({
-          tagline: req.body.tagline,
-          about: req.body.about,
-          profileImage: req.file.location
-        }, {
-          where: {
-            emailAddress: req.body.emailAddress
-          }
-        }).then((dbUser) => {
-          res.render("user/profile", dbUser.dataValues);
-        }).catch((err)=>{
-          res.render("error", { error: err });
-        })
-      }
-    });
-    //console.log(`File uploaded successfully. ${req.file.location}`);
+        username: req.body.username,
+      },
+    })
+      .then((dbUser) => {
+        if (dbUser === null) {
+          res.render("auth/signup", {
+            error: "User not found",
+            emailAddress: req.body.emailAddress,
+            userId: req.body.userId,
+          });
+        } else {
+          db.User.update(
+            {
+              tagline: req.body.tagline,
+              about: req.body.about,
+              twitter: req.body.twitter,
+              facebook: req.body.facebook,
+              linkedIn: req.body.linkedIn,
+              profileImage: req.file.location,
+            },
+            {
+              where: {
+                emailAddress: req.body.emailAddress,
+              },
+            }
+          )
+            .then((dbUser) => {
+              req.session.globalUser["profileImage"] = req.file.location;
+              res.redirect("/profile");
+            })
+            .catch((err) => {
+              res.render("error", { error: err });
+            });
+        }
+      })
+      .catch((err) => {
+        res.render("error", { error: err });
+      });
 
-  });
-}
-
-// Render Signup page
-exports.getSignupPage = (req, res) => {
-  return res.render("auth/signup", {
-    title: "Sign Up",
-    layout: "partials/prelogin",
+    console.log(`File uploaded successfully. || ${req.file}`);
   });
 };
 
 exports.signup = (req, res, next) => {
-  const singleUpload = upload.single('profileImage');
+  const singleUpload = upload.single("profileImage");
   singleUpload(req, res, (err) => {
     if (err) {
-      return res.status(422).send({errors: [{title: 'Image Upload Error', detail: err.message}]});
+      return res.status(422).send({
+        errors: [{ title: "Image Upload Error", detail: err.message }],
+      });
     }
 
     passport.authenticate("local-signup", (err, user, info) => {
@@ -151,7 +219,7 @@ exports.signup = (req, res, next) => {
           };
           return res.render("auth/signup", msg);
         }
-  
+
         req.session.globalUser = {};
         req.session.globalUser["userId"] = user.userId;
         req.session.globalUser["name"] = user.name;
@@ -163,7 +231,7 @@ exports.signup = (req, res, next) => {
       });
     })(req, res, next);
 
-    //console.log(`File uploaded successfully. ${req.file.location}`);
+    console.log(`File uploaded successfully. ${req.file.location}`);
   });
 };
 
@@ -252,10 +320,11 @@ exports.signin = (req, res, next) => {
       req.session.globalUser = {};
       req.session.globalUser["userId"] = user.userId;
       req.session.globalUser["name"] = user.name;
+      req.session.globalUser["username"] = user.username;
       req.session.globalUser["emailAddress"] = user.emailAddress;
       req.session.globalUser["phoneNumber"] = user.phoneNumber;
       req.session.globalUser["profileImage"] = user.profileImage;
-      return res.redirect("/newPost");
+      return res.redirect("/profile");
     });
   })(req, res, next);
 };

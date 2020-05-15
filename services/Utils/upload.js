@@ -3,7 +3,6 @@ const path = require("path");
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 
-
 aws.config.update({
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -26,7 +25,7 @@ const upload = multer({
     s3,
     bucket: 'bloget',
     metadata: function (req, file, cb) {
-      cb(null, {fieldName: 'profileImage'});
+      cb(null, {fieldName: file.fieldname});
     },
     key: function (req, file, cb) {
       cb(null, Date.now().toString() + path.extname(file.originalname))
