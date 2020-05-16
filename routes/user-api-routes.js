@@ -57,4 +57,30 @@ module.exports = (app) => {
         res.json(err);
       });
   });
+
+  app.get('/api/user/:userId/posts', (req,res)=>{
+    db.Post.findAll({
+      where: {
+          UserUserId: req.params.userId
+      }
+  }).then((dbPost)=>{
+    res.json(dbPost);
+  }).catch((err)=>{
+    res.json(err);
+  });
+  });
+  
+  app.get('/api/user/:userId/posts/:category', (req,res)=>{
+    db.Post.findAll({
+      where: {
+          UserUserId: req.params.userId,
+          postCategory: req.params.category,
+      }
+  }).then((dbPost)=>{
+    res.json(dbPost);
+  }).catch((err)=>{
+    res.json(err);
+  });
+  });
+
 };
