@@ -1,17 +1,27 @@
 const authController = require('../controllers/auth-controller.js');
+const {check} = require('express-validator');
 
 module.exports = function(app) {
     app.get('/signin', authController.getSigninPage);
     app.get('/signup', authController.getSignupPage);
+    
     app.post('/signin', authController.signin);
-    //app.post('/signup', authController.signup);
+
     app.get('/signout', authController.signout);
-    //app.get('/join', authController.getRegisterPage);
-    app.post('/join', authController.join);
 
-    app.post('/saveUserInfo', authController.saveUserInfo);
+    app.post('/join', [
+        check('emailAddress').not().isEmpty().escape().isEmail().withMessage('Please enter a valid email address')
+    ], authController.join);
 
-    app.post('/saveMoreInfo', authController.saveMoreInfo);
+    app.post('/signup', [
+        check('emailAddress').not().isEmpty().escape().isEmail().withMessage('Please enter your email address'),
+        check('name').not().isEmpty().escape().withMessage('Please enter your name'),
+        check('phoneNumber').not().isEmpty().escape().withMessage('Please enter your phone number'),
+        check('username').not().isEmpty().escape().withMessage('Please enter a unique username'),
+    ], authController.signup);
+
+    app.post('/finish', authController.finish);
+    
 // this is the route that prints out the user information from the user table
     app.get('/sessionUserId', authController.sessionUserId);
 }

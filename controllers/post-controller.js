@@ -5,7 +5,6 @@ const upload = require("../services/Utils/upload.js");
 exports.getHomePage = (req, res) => {
   return res.render("index", {
     title: "TaiBlog",
-    //layout: false,
   });
 };
 

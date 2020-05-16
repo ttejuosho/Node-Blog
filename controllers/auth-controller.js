@@ -18,17 +18,9 @@ exports.getSignupPage = (req, res) => {
   });
 };
 
-exports.getRegisterPage = (req, res) => {
-  return res.render("auth/getemail", {
-    title: "Register",
-    layout: "partials/prelogin",
-  });
-};
-
-exports.getUserInfoPage = (req, res) => {
-  return res.render("auth/getUserInfo", {
-    title: "Sign Up",
-    layout: "partials/prelogin",
+exports.signout = function (req, res) {
+  req.session.destroy(function (err) {
+    res.redirect("/signin");
   });
 };
 
@@ -57,7 +49,8 @@ exports.join = (req, res) => {
     });
 };
 
-exports.saveUserInfo = (req, res, next) => {
+exports.signup = (req, res, next) => {
+  if(req.body.password === req.body.confirmPassword){
   db.User.findOne({
     where: {
       username: req.body.username,
@@ -92,15 +85,6 @@ exports.saveUserInfo = (req, res, next) => {
                     return res.render("auth/signup", msg);
                   }
 
-                  console.log(user.dataValues);
-
-                  req.session.globalUser = {};
-                  req.session.globalUser["userId"] = user.dataValues.userId;
-                  req.session.globalUser["name"] = user.dataValues.name;
-                  req.session.globalUser["username"] = user.dataValues.username;
-                  req.session.globalUser["emailAddress"] =
-                    user.dataValues.emailAddress;
-
                   return res.render("auth/signup", {
                     layout: "partials/prelogin",
                     userInfoSaved: true,
@@ -123,7 +107,8 @@ exports.saveUserInfo = (req, res, next) => {
       } else {
         return res.render("auth/signup", {
           emailAvailable: true,
-          error: "username is taken",
+          layout: "partials/prelogin",
+          error: "Username is taken",
           emailAddress: req.body.emailAddress,
           name: req.body.name,
           username: req.body.username,
@@ -134,9 +119,20 @@ exports.saveUserInfo = (req, res, next) => {
     .catch((err) => {
       res.render("error", { error: err });
     });
+  } else {
+    return res.render("auth/signup", {
+      emailAvailable: true,
+      layout: "partials/prelogin",
+      error: "Passwords dont match",
+      emailAddress: req.body.emailAddress,
+      name: req.body.name,
+      username: req.body.username,
+      phoneNumber: req.body.phoneNumber,
+    });
+  }
 };
 
-exports.saveMoreInfo = (req, res) => {
+exports.finish = (req, res) => {
   const singleUpload = upload.single("profileImage");
   singleUpload(req, res, (err) => {
     if (err) {
@@ -191,109 +187,6 @@ exports.saveMoreInfo = (req, res) => {
   });
 };
 
-exports.signup = (req, res, next) => {
-  const singleUpload = upload.single("profileImage");
-  singleUpload(req, res, (err) => {
-    if (err) {
-      return res.status(422).send({
-        errors: [{ title: "Image Upload Error", detail: err.message }],
-      });
-    }
-
-    passport.authenticate("local-signup", (err, user, info) => {
-      if (err) {
-        return next(err); // will generate a 500 error
-      }
-      if (!user) {
-        const msg = {
-          error: "Sign Up Failed: Username already exists",
-          layout: "partials/prelogin",
-        };
-        return res.render("auth/signup", msg);
-      }
-      req.login(user, (signupErr) => {
-        if (signupErr) {
-          const msg = {
-            error: "Sign up Failed",
-            layout: "partials/prelogin",
-          };
-          return res.render("auth/signup", msg);
-        }
-
-        req.session.globalUser = {};
-        req.session.globalUser["userId"] = user.userId;
-        req.session.globalUser["name"] = user.name;
-        req.session.globalUser["username"] = user.username;
-        req.session.globalUser["emailAddress"] = user.emailAddress;
-        req.session.globalUser["phoneNumber"] = user.phoneNumber;
-        req.session.globalUser["profileImage"] = req.file.location;
-        res.redirect("/newPost");
-      });
-    })(req, res, next);
-
-    console.log(`File uploaded successfully. ${req.file.location}`);
-  });
-};
-
-exports.signupp = (req, res, next) => {
-  upload(req, res, (err) => {
-    console.log(req.files.profileImage);
-    if (req.files === undefined) {
-      const msg = {
-        error: "Sign Up Failed: No Image Attached",
-        layout: "partials/prelogin",
-      };
-      return res.render("auth/signup", msg);
-    } else if (
-      req.body.name == "" ||
-      req.body.emailAddress == "" ||
-      req.body.phoneNumber == ""
-    ) {
-      const msg = {
-        error: "Name, Email, & Phone Number required",
-        layout: "partials/prelogin",
-      };
-      return res.render("auth/signup", msg);
-    } else if (err) {
-      const msg = {
-        error: "Sign Up Failed",
-        layout: "partials/prelogin",
-      };
-      return res.render("auth/signup", msg);
-    } else {
-      passport.authenticate("local-signup", (err, user, info) => {
-        if (err) {
-          return next(err); // will generate a 500 error
-        }
-        if (!user) {
-          const msg = {
-            error: "Sign Up Failed: Username already exists",
-            layout: "partials/prelogin",
-          };
-          return res.render("auth/signup", msg);
-        }
-        req.login(user, (signupErr) => {
-          if (signupErr) {
-            const msg = {
-              error: "Sign up Failed",
-              layout: "partials/prelogin",
-            };
-            return res.render("auth/signup", msg);
-          }
-
-          req.session.globalUser = {};
-          req.session.globalUser["userId"] = user.userId;
-          req.session.globalUser["name"] = user.name;
-          req.session.globalUser["emailAddress"] = user.emailAddress;
-          req.session.globalUser["phoneNumber"] = user.phoneNumber;
-          req.session.globalUser["profileImage"] = user.profileImage;
-          res.redirect("/newPost");
-        });
-      })(req, res, next);
-    }
-  });
-};
-
 exports.signin = (req, res, next) => {
   passport.authenticate("local-signin", function (err, user, info) {
     if (err) {
@@ -329,11 +222,7 @@ exports.signin = (req, res, next) => {
   })(req, res, next);
 };
 
-exports.signout = function (req, res) {
-  req.session.destroy(function (err) {
-    res.redirect("/signin");
-  });
-};
+
 
 // prints out the user info from the session id
 exports.sessionUserId = function (req, res) {
