@@ -1,12 +1,13 @@
 <div class="row mt-3 mb-3">
 
-    <div class="col-5"><img class="img-fluid mx-auto profileImage" src="{{profileImage}}" /></div>
+    <div class="col-md-5"><img class="img-fluid mx-auto profileImage" src="{{profileImage}}" /></div>
 
-    <div class="col-7">
+    <div class="col-md-7">
         <h3 class="display-4">{{name}}</h3>
-        <h6>@{{username}}</h6>
+        <h6>{{#if loggedinUser}} @{{loggedinUser}} {{else}} @{{username}} {{/if}}</h6>
         <p class="lead">{{tagline}}</p>
         <p>{{about}}</p>
+        <h6>Member Since: {{#formatDate memberSince}} {{/formatDate}}</h6>
         <p class="mt-5"> 
             <span class="mr-2"> <a class="text-dark" href="https://www.facebook.com/{{facebook}}" target="_blank"><i class="fab fa-facebook fa-2x"></i></a></span> 
             <span class="mr-2"> <a class="text-dark" href="https://www.linkedin.com/in/{{linkedIn}}" target="_blank"><i class="fab fa-linkedin fa-2x"></i></a></span> 
@@ -18,43 +19,96 @@
 </div>
 <hr class="bloget-divider">
 
-<p class="display-4 font-weight-bold">Posts</p>
+<ul class="nav nav-tabs mb-1" role="tablist">
+  <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark active" id="posts-tab" data-toggle="tab" href="#posts" aria-controls="posts" aria-selected="true">Posts</a></li>
+  <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark" id="drafts-tab" data-toggle="tab" href="#drafts" aria-controls="drafts" aria-selected="false">Drafts</a></li>
+</ul>
 
-  <div class="row mb-2">
-    <div class="col-md-12">
-      <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-        <div class="col p-4 d-flex flex-column position-static">
-          <strong class="d-inline-block mb-2 text-primary">World</strong>
-          <h3 class="mb-0">Featured post</h3>
-          <div class="mb-1 text-muted">Nov 12</div>
-          <p class="card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
-          <a href="#" class="stretched-link">Continue reading</a>
-        </div>
-        <div class="col-auto d-none d-lg-block">
-          <svg class="bd-placeholder-img" width="300" height="250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="38%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+
+{{!-- <p class="display-4 font-weight-bold">Posts</p> --}}
+<div class="tab-content">
+  <div id="posts" class="tab-pane fade show active" role="tabpanel" aria-labelledby="posts-tab">
+      <div class="row mb-2">
+        <div class="col-md-12">
+          <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+            <div class="col p-4 d-flex flex-column position-static">
+              <strong class="d-inline-block mb-2 text-primary">World</strong>
+              <h3 class="mb-0">Featured Post</h3>
+              <div class="mb-1 text-muted">Nov 12, 2020</div>
+              <p class="card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="stretched-link">Continue reading</a>
+            </div>
+            <div class="col-auto d-none d-lg-block">
+              <svg class="bd-placeholder-img" width="300" height="250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="38%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
-{{#each Posts}}
-  <div class="row mb-2">
-    <div class="col-md-12">
-      <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-        <div class="col p-4 d-flex flex-column position-static">
-          <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
-          <h3 class="mb-0">{{postTitle}}</h3>
-          <div class="mb-1 text-muted">{{createdAt}}</div>
-          <p class="card-text mb-auto">{{postDescription}}</p>
-          <small class="form-text text-muted">{{viewCount}}</small>
-          <a href="/post/{{postId}}" class="stretched-link">Continue reading</a>
-        </div>
-        <div class="col-auto d-none d-lg-block">
-          <img src="{{postImage}}" style="height: 250px;" />
+    {{#each Posts}} {{#if published}}
+      <div class="row mb-2">
+        <div class="col-md-12">
+          <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+            <div class="col p-4 d-flex flex-column position-static">
+              <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
+              <h3 class="mb-0">{{postTitle}}</h3>
+              <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
+              <p class="card-text mb-auto">{{postDescription}}</p>
+              <small class="form-text text-muted">Viewed {{viewCount}} times</small>
+              <a href="/post/{{postId}}" class="stretched-link">Continue reading</a>
+            </div>
+            <div class="col-auto d-none d-lg-block">
+              <img src="{{postImage}}" style="height: 250px; width: 350px;" />
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+      {{/if}}
+      {{else}}
+        <p> This user has no posts yet. </p>
+    {{/each}}
   </div>
-  {{else}}
-  <p>This user has no posts.</p>
-{{/each}}
+
+  <div id="drafts" class="tab-pane fade" role="tabpanel" aria-labelledby="drafts-tab">
+    <div class="row mb-2">
+        <div class="col-md-12">
+          <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+            <div class="col p-4 d-flex flex-column position-static">
+              <strong class="d-inline-block mb-2 text-primary">Economy</strong>
+              <h3 class="mb-0">Featured Draft</h3>
+              <div class="mb-1 text-muted">Nov 12</div>
+              <p class="card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="stretched-link">Continue reading</a>
+            </div>
+            <div class="col-auto d-none d-lg-block">
+              <svg class="bd-placeholder-img" width="300" height="250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="38%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+            </div>
+          </div>
+        </div>
+    </div>
+          
+    {{#each Posts}} {{#if isDraft}}
+    <div class="row mb-2">
+        <div class="col-md-12">
+          <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+            <div class="col p-4 d-flex flex-column position-static">
+              <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
+              <h3 class="mb-0">{{postTitle}}</h3>
+              <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
+              <p class="card-text mb-auto">{{postDescription}}</p>
+              <a href="#" class="stretched-link">Continue reading</a>
+            </div>
+            <div class="col-auto d-none d-lg-block">
+              <img src="{{postImage}}" style="height: 250px;" />
+            </div>
+          </div>
+        </div>
+    </div>
+
+  {{/if}}
+  {{/each}}
+  </div>
+
+
+
+</div>

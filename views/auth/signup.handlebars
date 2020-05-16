@@ -1,6 +1,6 @@
 {{#if emailAvailable}}
 
-<form class="form-signin" method="POST" action="/saveUserInfo">
+<form class="form-signin" method="POST" action="/signup">
     <img class="mb-4" src="/assets/img/blogetB3.png" alt="bloget-logo" width="110" height="100">
 
     <h1 class="h3 mb-3 font-weight-normal">Welcome to Bloget</h1>
@@ -25,14 +25,14 @@
     <label for="ConfirmPassword" class="sr-only">Confirm Password</label>
     <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirm Password" required="">
 
-    <button class="btn btn-lg btn-dark btn-block mt-3" type="submit">Sign in</button>
+    <button class="btn btn-lg btn-dark btn-block mt-3" type="submit">Sign up</button>
 
     <p class="mt-5 mb-3 text-muted">© Bloget 2020</p>
 </form>
 
 {{else if userInfoSaved}}
 
-<form class="form-signin" method="POST" action="/saveMoreInfo" enctype="multipart/form-data">
+<form class="form-signin" method="POST" action="/finish" enctype="multipart/form-data">
     <img class="mb-4" src="/assets/img/blogetB3.png" alt="bloget-logo" width="110" height="100">
 
     <h1 class="h3 mb-3 font-weight-normal">Welcome to Bloget</h1>
