@@ -74,7 +74,6 @@ const hbs = exphbs.create({
   defaultLayout: "main"
 });
 
-//app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.engine('handlebars', hbs.engine);
 app.set("view engine", "handlebars");
 
@@ -83,6 +82,21 @@ app.use((req, res, next) => {
   // winston.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
   if (req.isAuthenticated) {
     res.locals.isAuthenticated = req.isAuthenticated();
+    if (req.user !== undefined){
+      res.locals.userId = req.user.userId;
+      res.locals.name = req.user.name;
+      res.locals.loggedinUser = req.user.username;
+      res.locals.emailAddress = req.user.emailAddress;
+      res.locals.phoneNumber = req.user.phoneNumber;
+      res.locals.profileImage = req.user.profileImage;
+      res.locals.memberSince = req.user.createdAt;
+      res.locals.linkedIn = req.user.linkedIn;
+      res.locals.twitter = req.user.twitter;
+      res.locals.facebook = req.user.facebook;
+      res.locals.about = req.user.about;
+      res.locals.tagline = req.user.tagline;
+    }
+
   }
   next();
 });
