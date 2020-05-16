@@ -27,20 +27,20 @@ exports.createNewPost = (req, res) => {
       postTitle: req.body.postTitle,
       postDescription: req.body.postDescription,
       postBody: req.body.postBody,
+      postCategory: req.body.postCategory,
       postImage: req.file.location,
       UserUserId: req.session.passport.user,
       isDraft: req.body.action === "Save Draft" ? true : false,
       published: req.body.action === "Save Draft" ? false : true,
     };
-
+    
     db.Post.create(postData).then((dbPost) => {
-      console.log(dbPost.dataValues);
       res.render("post/viewPost", dbPost.dataValues);
     }).catch((err)=>{
       res.render("error", { error: err });
   });
 
-    console.log(`File uploaded successfully. || ${req.file}`);
+    console.log(`File uploaded successfully. || ${req.file.location}`);
   });
 };
 

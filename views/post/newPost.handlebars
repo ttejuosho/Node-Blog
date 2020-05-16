@@ -8,7 +8,7 @@
         value="{{postTitle}}">
 
     <label for="Category" class="sr-only">Category</label>
-    <select id="postCategorySelectize" class="form-control mb-2" placeholder="Category">
+    <select id="postCategory" name="postCategory" class="form-control mb-2" placeholder="Category">
         <option value="">Choose Category</option>
     </select>
 
@@ -32,7 +32,7 @@
 
 <script>
 
-    $('#postCategorySelectize').selectize({
+    $('#postCategory').selectize({
         maxItems: 1,
         create: true,
         labelField: 'value',
@@ -48,7 +48,7 @@
         }
     });
 
-$('#postCategorySelectize')[0].selectize.addOption(
+$('#postCategory')[0].selectize.addOption(
     [
         { text: "Economy", value: "Economy" },{ text: "World", value: "World" },
         { text: "Technnology", value: "Technology" },{ text: "Culture", value: "Culture" },

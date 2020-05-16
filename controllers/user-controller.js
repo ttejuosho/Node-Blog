@@ -30,7 +30,6 @@ exports.getProfilePagee = (req, res) => {
             for (var i = 0; i < dbPost.length; i++){
                 hbsObject.Posts.push(dbPost[i].dataValues);
             }
-            console.log(hbsObject);
             res.render("user/profile", hbsObject);
         }
     }).catch((err)=>{
@@ -51,7 +50,6 @@ exports.getProfilePagee = (req, res) => {
         if (dbUser !== null){
             const hbsObject = dbUser.toJSON();
             hbsObject.title = "@" + hbsObject.username;
-            console.log(hbsObject);
             res.render("user/profile", hbsObject)
         }
     }).catch((err)=>{
