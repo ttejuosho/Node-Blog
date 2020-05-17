@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    shortName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     username: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -59,6 +63,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
     },
     linkedIn: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    github: {
       type: DataTypes.STRING,
       allowNull: true,
     }

@@ -35,7 +35,15 @@ module.exports = (app) => {
 
   //Get a post
   app.get("/api/getpost/:postId", (req, res) => {
-    db.Post.findByPk(req.params.postId).then((dbPost) => {
+    db.Post.findByPk(req.params.postId, {
+      include: [
+        {
+          model: db.User,
+          as: "User",
+          attributes: ["userId", "username", "name", "shortName", "profileImage", "about", "linkedIn", "facebook", "twitter", "github"],
+        },
+      ]
+    }).then((dbPost) => {
       if (dbPost !== null) {
         res.json(dbPost);
       } else {

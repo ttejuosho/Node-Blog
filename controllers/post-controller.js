@@ -50,7 +50,7 @@ exports.getPost = (req, res) => {
       {
         model: db.User,
         as: "User",
-        attributes: ["userId", "username", "name", "profileImage"],
+        attributes: ["userId", "username", "name", "shortName", "profileImage", "about", "linkedIn", "facebook", "twitter", "github"],
       },
     ]
   }).then((dbPost) => {
@@ -68,8 +68,14 @@ exports.getPost = (req, res) => {
         createdAt: dbPost.dataValues.createdAt,
         username: dbPost.User.dataValues.username,
         name: dbPost.User.dataValues.name,
+        shortName: dbPost.User.dataValues.shortName,
+        about: dbPost.User.dataValues.about,
+        linkedIn: dbPost.User.dataValues.linkedIn,
+        facebook: dbPost.User.dataValues.facebook,
+        twitter: dbPost.User.dataValues.twitter,
+        github: dbPost.User.dataValues.github,
       };
-      console.log(hbsObject);
+      //console.log(hbsObject);
       return res.render("post/viewPost", hbsObject);
     } else {
       return res.render('post/viewPost', { message: 'Not Found'});
