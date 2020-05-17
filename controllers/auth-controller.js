@@ -98,8 +98,8 @@ exports.signup = (req, res, next) => {
                   return res.render("auth/auth", {
                     layout: "partials/prelogin",
                     userInfoSaved: true,
-                    isLoggedIn: true,
                     name: user.dataValues.name,
+                    shortName: user.dataValues.shortName,
                     username: user.dataValues.username,
                     emailAddress: user.dataValues.emailAddress,
                     userId: user.dataValues.userId,
@@ -120,6 +120,7 @@ exports.signup = (req, res, next) => {
           layout: "partials/prelogin",
           error: "Username is taken",
           emailAddress: req.body.emailAddress,
+          shortName: user.body.shortName,
           name: req.body.name,
           username: req.body.username,
           phoneNumber: req.body.phoneNumber,
@@ -136,6 +137,7 @@ exports.signup = (req, res, next) => {
       error: "Passwords dont match",
       emailAddress: req.body.emailAddress,
       name: req.body.name,
+      shortName: user.body.shortName,
       username: req.body.username,
       phoneNumber: req.body.phoneNumber,
     });

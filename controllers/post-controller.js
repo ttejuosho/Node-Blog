@@ -59,6 +59,7 @@ exports.getPost = (req, res) => {
         postId: dbPost.dataValues.postId,
         postTitle: dbPost.dataValues.postTitle,
         postBody: dbPost.dataValues.postBody,
+        postCategory: dbPost.dataValues.postCategory,
         postDescription: dbPost.dataValues.postDescription,
         postImage: dbPost.dataValues.postImage,
         isDraft: dbPost.dataValues.isDraft,
@@ -84,3 +85,62 @@ exports.getPost = (req, res) => {
     res.render("error", { error: err });
 });
 };
+
+exports.getEditPost = (req, res) => {
+  db.Post.findOne({
+    where: {
+      postId: req.params.postId,
+      UserUserId: res.locals.userId,
+    }
+  }).then((dbPost)=> {
+    if(dbPost !== null){
+      var hbsObject = {
+        postId: dbPost.dataValues.postId,
+        postTitle: dbPost.dataValues.postTitle,
+        postBody: dbPost.dataValues.postBody,
+        postCategory: dbPost.dataValues.postCategory,
+        postDescription: dbPost.dataValues.postDescription,
+        postImage: dbPost.dataValues.postImage,
+        isDraft: dbPost.dataValues.isDraft,
+        published: dbPost.dataValues.published,
+        viewCount: dbPost.dataValues.viewCount,
+        editMode: true,
+      };
+      //console.log(hbsObject);
+      return res.render("post/newPost", hbsObject);
+    }
+  }).catch((err)=>{
+    res.render("error", { error: err });
+});
+}
+
+exports.updatePost = (req, res) => {
+  db.Post.findOne({
+    where: {
+      postId: req.params.postId,
+      UserUserId: res.locals.userId,
+    }
+  }).then((dbPost)=> {
+    if(dbPost !== null){
+      const postData = {
+        postTitle: req.body.postTitle,
+        postDescription: req.body.postDescription,
+        postBody: req.body.postBody,
+        postCategory: req.body.postCategory,
+        //postImage: req.body.postImageUrl,      
+        isDraft: req.body.action === "Save Draft" ? true : false,
+        published: req.body.action === "Save Draft" ? false : true,
+      };
+      console.log(postData);
+      db.Post.update(postData, {
+        where: {
+          postId: req.params.postId,
+        }
+      }).then((dbPost)=>{
+        res.redirect('/profile');
+      }).catch((err) => {
+        res.render('error', err);
+      });
+    }
+  });
+}

@@ -14,4 +14,12 @@ module.exports = function(app) {
     ], Security.isLoggedIn , postController.createNewPost);
 
     app.get('/post/:postId', postController.getPost);
+
+    app.get('/post/edit/:postId', postController.getEditPost);
+    app.post('/post/edit/:postId', postController.updatePost);
+    
+    // app.get('/postdelete/:postId', postController.deletePost);
+
+    // app.get('/postpublish/:postId', postController.publishPost);
+    // app.get('/postunpublish/:postId', postController.unpublishPost);
 }

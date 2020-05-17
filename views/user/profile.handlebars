@@ -28,22 +28,6 @@
 {{!-- <p class="display-4 font-weight-bold">Posts</p> --}}
 <div class="tab-content">
   <div id="posts" class="tab-pane fade show active" role="tabpanel" aria-labelledby="posts-tab">
-      <div class="row mb-2">
-        <div class="col-md-12">
-          <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-            <div class="col p-4 d-flex flex-column position-static">
-              <strong class="d-inline-block mb-2 text-primary">World</strong>
-              <h3 class="mb-0">Featured Post</h3>
-              <div class="mb-1 text-muted">Nov 12, 2020</div>
-              <p class="card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
-              <a href="#" class="stretched-link">Continue reading</a>
-            </div>
-            <div class="col-auto d-none d-lg-block">
-              <svg class="bd-placeholder-img" width="300" height="250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="38%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
-            </div>
-          </div>
-        </div>
-      </div>
 
     {{#each Posts}} {{#if published}}
       <div class="row mb-2">
@@ -55,7 +39,12 @@
               <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
               <p class="card-text mb-auto">{{postDescription}}</p>
               <small class="form-text text-muted">Viewed {{viewCount}} times</small>
-              <a href="/post/{{postId}}" class="stretched-link">Continue reading</a>
+              <p class="mb-0">
+                <span class="mr-2"> <a class="text-success" href="/post/{{postId}}"><i class="fas fa-binoculars fa-2x"></i></a></span>
+                <span class="mr-2"> <a class="text-secondary" href="/post/unpublish/{{postId}}"><i class="fas fa-download fa-2x"></i></a></span>
+                <span class="mr-2"> <a class="text-secondary" href="/post/edit/{{postId}}"><i class="fas fa-edit fa-2x"></i></a></span>
+                <span class="mr-1"> <a class="text-danger" href="/post/delete/{{postId}}"><i class="fas fa-trash-alt fa-2x"></i></a></span>
+              </p>
             </div>
             <div class="col-auto d-none d-lg-block">
               <img src="{{postImage}}" style="height: 250px; width: 350px;" />
@@ -63,30 +52,13 @@
           </div>
         </div>
       </div>
+      {{!-- {{else}}
+        <p> This user has no posts yet. </p> --}}
       {{/if}}
-      {{else}}
-        <p> This user has no posts yet. </p>
     {{/each}}
   </div>
 
-  <div id="drafts" class="tab-pane fade" role="tabpanel" aria-labelledby="drafts-tab">
-    <div class="row mb-2">
-        <div class="col-md-12">
-          <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-            <div class="col p-4 d-flex flex-column position-static">
-              <strong class="d-inline-block mb-2 text-primary">Economy</strong>
-              <h3 class="mb-0">Featured Draft</h3>
-              <div class="mb-1 text-muted">Nov 12</div>
-              <p class="card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
-              <a href="#" class="stretched-link">Continue reading</a>
-            </div>
-            <div class="col-auto d-none d-lg-block">
-              <svg class="bd-placeholder-img" width="300" height="250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="38%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
-            </div>
-          </div>
-        </div>
-    </div>
-          
+  <div id="drafts" class="tab-pane fade" role="tabpanel" aria-labelledby="drafts-tab">        
     {{#each Posts}} {{#if isDraft}}
     <div class="row mb-2">
         <div class="col-md-12">
@@ -96,7 +68,12 @@
               <h3 class="mb-0">{{postTitle}}</h3>
               <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
               <p class="card-text mb-auto">{{postDescription}}</p>
-              <a href="#" class="stretched-link">Continue reading</a>
+              <p class="mb-0">
+                <span class="mr-2"> <a class="text-success" href="/post/{{postId}}"><i class="fas fa-binoculars fa-2x"></i></a></span>
+                <span class="mr-2"> <a class="text-secondary" href="/post/publish/{{postId}}"><i class="fas fa-upload fa-2x"></i></a></span>
+                <span class="mr-2"> <a class="text-secondary" href="/post/edit/{{postId}}"><i class="fas fa-edit fa-2x"></i></a></span>
+                <span class="mr-1"> <a class="text-danger" href="/post/delete/{{postId}}"><i class="fas fa-trash-alt fa-2x"></i></a></span>
+              </p>
             </div>
             <div class="col-auto d-none d-lg-block">
               <img src="{{postImage}}" style="height: 250px;" />
@@ -104,7 +81,6 @@
           </div>
         </div>
     </div>
-
   {{/if}}
   {{/each}}
   </div>

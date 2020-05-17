@@ -51,6 +51,7 @@ module.exports = function(passport, user) {
           emailAddress: email,
           password: userPassword,
           name: req.body.name,
+          shortName: req.body.shortName,
           username: req.body.username,
           phoneNumber: req.body.phoneNumber
         };
@@ -65,11 +66,11 @@ module.exports = function(passport, user) {
         }).then(()=>{
           //Send Confirmation Email to new user
           const emailBody = `
-          <p>Hello ${req.body.name.split(' ')[0]},</p>
-          <p style="color: black;">Your account is set and you're all good to go. Click <a href="https://surveneer.herokuapp.com/">here</a> to sign in to create your first survey.</p>
-          <p> <span style="font-size: 1rem;color: black;"><strong>The TaiBlog</strong></span></p>
+          <p>Hello ${req.body.shortName},</p>
+          <p style="color: black;">Your account is set and you're all good to go. Click <a href="https://bloget.herokuapp.com/">here</a> to sign in to create your first blog post.</p>
+          <p> <span style="font-size: 1rem;color: black;"><strong>The Bloget Team</strong></span></p>
           `;
-          sendEmail(emailBody, 'Welcome to T-Log !', email);
+          sendEmail(emailBody, 'Welcome to Bloget!', email);
         });
       }
     });
