@@ -4,7 +4,8 @@ const {check} = require('express-validator');
 module.exports = function(app) {
     app.get('/signin', authController.getSigninPage);
     app.get('/signup', authController.getSignupPage);
-    
+    app.get('/iForgot', authController.getiForgotPage);
+    app.post('/iForgot', authController.iForgot);    
     app.post('/signin', authController.signin);
 
     app.get('/signout', authController.signout);

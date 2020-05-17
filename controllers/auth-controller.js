@@ -4,17 +4,27 @@ const upload = require("../services/Utils/upload.js");
 
 // Render Signin page
 exports.getSigninPage = (req, res) => {
-  return res.render("auth/signin", {
+  return res.render("auth/auth", {
     title: "Sign In",
     layout: "partials/prelogin",
+    signin: true,
   });
 };
 
 // Render Signup page
 exports.getSignupPage = (req, res) => {
-  return res.render("auth/signup", {
+  return res.render("auth/auth", {
     title: "Sign Up",
     layout: "partials/prelogin",
+  });
+};
+
+// Render Forgot Password page
+exports.getiForgotPage = (req, res) => {
+  return res.render("auth/auth", {
+    title: "iForgot",
+    layout: "partials/prelogin",
+    iForgot: true,
   });
 };
 
@@ -32,13 +42,13 @@ exports.join = (req, res) => {
   })
     .then((dbUser) => {
       if (dbUser === null) {
-        res.render("auth/signup", {
+        res.render("auth/auth", {
           emailAvailable: true,
           emailAddress: req.body.emailAddress,
           layout: "partials/prelogin",
         });
       } else {
-        res.render("auth/signup", {
+        res.render("auth/auth", {
           error: "Email already exists",
           layout: "partials/prelogin",
         });
@@ -74,7 +84,7 @@ exports.signup = (req, res, next) => {
                     error: "Sign Up Failed: Username already exists",
                     layout: "partials/prelogin",
                   };
-                  return res.render("auth/signup", msg);
+                  return res.render("auth/auth", msg);
                 }
                 req.login(user, (signupErr) => {
                   if (signupErr) {
@@ -82,10 +92,10 @@ exports.signup = (req, res, next) => {
                       error: "Sign up Failed",
                       layout: "partials/prelogin",
                     };
-                    return res.render("auth/signup", msg);
+                    return res.render("auth/auth", msg);
                   }
 
-                  return res.render("auth/signup", {
+                  return res.render("auth/auth", {
                     layout: "partials/prelogin",
                     userInfoSaved: true,
                     isLoggedIn: true,
@@ -105,7 +115,7 @@ exports.signup = (req, res, next) => {
             res.render("error", { error: err });
           });
       } else {
-        return res.render("auth/signup", {
+        return res.render("auth/auth", {
           emailAvailable: true,
           layout: "partials/prelogin",
           error: "Username is taken",
@@ -120,7 +130,7 @@ exports.signup = (req, res, next) => {
       res.render("error", { error: err });
     });
   } else {
-    return res.render("auth/signup", {
+    return res.render("auth/auth", {
       emailAvailable: true,
       layout: "partials/prelogin",
       error: "Passwords dont match",
@@ -149,10 +159,9 @@ exports.finish = (req, res) => {
     })
       .then((dbUser) => {
         if (dbUser === null) {
-          res.render("auth/signup", {
+          res.render("auth/auth", {
             error: "User not found",
             emailAddress: req.body.emailAddress,
-            userId: req.body.userId,
           });
         } else {
           db.User.update(
@@ -162,6 +171,7 @@ exports.finish = (req, res) => {
               twitter: req.body.twitter,
               facebook: req.body.facebook,
               linkedIn: req.body.linkedIn,
+              github: req.body.github,
               profileImage: req.file.location,
             },
             {
@@ -171,7 +181,7 @@ exports.finish = (req, res) => {
             }
           )
             .then((dbUser) => {
-              req.session.globalUser["profileImage"] = req.file.location;
+              res.locals.profileImage = req.file.location;
               res.redirect("/profile");
             })
             .catch((err) => {
@@ -222,7 +232,9 @@ exports.signin = (req, res, next) => {
   })(req, res, next);
 };
 
-
+exports.iForgot = (req, res) => {
+  return res.json("This will send an email to " + req.body.emailAddress);
+}
 
 // prints out the user info from the session id
 exports.sessionUserId = function (req, res) {
