@@ -19,7 +19,8 @@ exports.getProfilePagee = (req, res) => {
   exports.getProfilePage = (req, res) => {
     db.Post.findAll({
         where: {
-            UserUserId: req.user.userId
+            UserUserId: req.user.userId,
+            deleted: false,
         },
         order: [
             ['createdAt', 'DESC'],

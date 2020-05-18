@@ -1,5 +1,6 @@
 const db = require("../models");
 const upload = require("../services/Utils/upload.js");
+const sequelize = require("sequelize");
 
 // Render new home page
 exports.getHomePage = (req, res) => {
@@ -38,7 +39,7 @@ exports.createNewPost = (req, res) => {
       res.render("post/viewPost", dbPost.dataValues);
     }).catch((err)=>{
       res.render("error", { error: err });
-  });
+    });
 
     console.log(`File uploaded successfully. || ${req.file.location}`);
   });
@@ -55,6 +56,7 @@ exports.getPost = (req, res) => {
     ]
   }).then((dbPost) => {
     if (dbPost !== null) {
+
       var hbsObject = {
         postId: dbPost.dataValues.postId,
         postTitle: dbPost.dataValues.postTitle,
@@ -76,6 +78,12 @@ exports.getPost = (req, res) => {
         twitter: dbPost.User.dataValues.twitter,
         github: dbPost.User.dataValues.github,
       };
+
+      //When not signed in or another user is viewing post, ViewCount increment
+      if (!req.isAuthenticated || (res.locals.userId !== dbPost.dataValues.UserUserId)){
+          db.Post.increment({ viewCount: 1 }, { where: { postId: req.params.postId }});
+      }
+
       //console.log(hbsObject);
       return res.render("post/viewPost", hbsObject);
     } else {
@@ -115,6 +123,14 @@ exports.getEditPost = (req, res) => {
 }
 
 exports.updatePost = (req, res) => {
+  const singleUpload = upload.single("postImage");
+  singleUpload(req, res, (err) => {
+    if (err) {
+      return res.status(422).send({
+        errors: [{ title: "Image Upload Error", detail: err.message }],
+      });
+    }
+
   db.Post.findOne({
     where: {
       postId: req.params.postId,
@@ -127,11 +143,13 @@ exports.updatePost = (req, res) => {
         postDescription: req.body.postDescription,
         postBody: req.body.postBody,
         postCategory: req.body.postCategory,
-        //postImage: req.body.postImageUrl,      
+        postImage: (req.file ? req.file.location : dbPost.dataValues.postImage),      
         isDraft: req.body.action === "Save Draft" ? true : false,
         published: req.body.action === "Save Draft" ? false : true,
       };
-      console.log(postData);
+
+      //console.log(req.file);
+
       db.Post.update(postData, {
         where: {
           postId: req.params.postId,
@@ -142,5 +160,78 @@ exports.updatePost = (req, res) => {
         res.render('error', err);
       });
     }
+
+  }).catch((err) => {
+    res.render('error', err);
+  });
+});
+}
+
+exports.publishPost = (req,res) => {
+  db.Post.findOne({
+    where: {
+      postId: req.params.postId,
+      UserUserId: res.locals.userId,
+    }
+  }).then((dbPost)=>{
+    if (dbPost !== null){
+      db.Post.update({ published: true, isDraft: false }, {
+        where: {
+          postId: req.params.postId,
+        }
+      }).then((dbPost)=>{
+        res.redirect('/profile');
+      }).catch((err) => {
+        res.render('error', err);
+      });
+    }
+  }).catch((err) => {
+    res.render('error', err);
+  });
+}
+
+exports.unpublishPost = (req,res) => {
+  db.Post.findOne({
+    where: {
+      postId: req.params.postId,
+      UserUserId: res.locals.userId,
+    }
+  }).then((dbPost)=>{
+    if (dbPost !== null){
+      db.Post.update({ published: false, isDraft: true }, {
+        where: {
+          postId: req.params.postId,
+        }
+      }).then((dbPost)=>{
+        res.redirect('/profile');
+      }).catch((err) => {
+        res.render('error', err);
+      });
+    }
+  }).catch((err) => {
+    res.render('error', err);
+  });
+}
+
+exports.deletePost = (req,res) => {
+  db.Post.findOne({
+    where: {
+      postId: req.params.postId,
+      UserUserId: res.locals.userId,
+    }
+  }).then((dbPost)=>{
+    if (dbPost !== null){
+      db.Post.update({ deleted: true }, {
+        where: {
+          postId: req.params.postId,
+        }
+      }).then((dbPost)=>{
+        res.redirect('/profile');
+      }).catch((err) => {
+        res.render('error', err);
+      });
+    }
+  }).catch((err) => {
+    res.render('error', err);
   });
 }

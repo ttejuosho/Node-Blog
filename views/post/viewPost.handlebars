@@ -5,7 +5,7 @@
       
       <div class="blog-post">
         <h2 class="blog-post-title">{{postTitle}}</h2>
-        <img class="mt-2 mb-2" src="{{postImage}}" >
+        <img class="mt-2 mb-2" src="{{postImage}}" style="width: 100%;">
         <p class="blog-post-meta">{{#formatDate createdAt}} {{/formatDate}} by <a href="/profile/{{username}}">{{name}}</a></p>
 
         {{{postBody}}}
@@ -59,5 +59,20 @@
     </aside><!-- /.blog-sidebar -->
 
   </div><!-- /.row -->
+
+    <!-- Then put toasts within -->
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <img src="..." class="rounded mr-2" alt="...">
+        <strong class="mr-auto">Bootstrap</strong>
+        <small class="text-muted">just now</small>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="toast-body">
+        See? Just like this.
+      </div>
+    </div>
 
 </main>

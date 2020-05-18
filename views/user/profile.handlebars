@@ -38,12 +38,12 @@
               <h3 class="mb-0">{{postTitle}}</h3>
               <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
               <p class="card-text mb-auto">{{postDescription}}</p>
-              <small class="form-text text-muted">Viewed {{viewCount}} times</small>
+              <small class="form-text text-muted mb-2">Viewed {{viewCount}} times</small>
               <p class="mb-0">
-                <span class="mr-2"> <a class="text-success" href="/post/{{postId}}"><i class="fas fa-binoculars fa-2x"></i></a></span>
-                <span class="mr-2"> <a class="text-secondary" href="/post/unpublish/{{postId}}"><i class="fas fa-download fa-2x"></i></a></span>
-                <span class="mr-2"> <a class="text-secondary" href="/post/edit/{{postId}}"><i class="fas fa-edit fa-2x"></i></a></span>
-                <span class="mr-1"> <a class="text-danger" href="/post/delete/{{postId}}"><i class="fas fa-trash-alt fa-2x"></i></a></span>
+                <span class="mr-3"> <a class="text-success" href="/post/{{postId}}"><i class="fas fa-binoculars fa-2x"></i></a></span>
+                <span class="mr-3"> <a class="text-info" onclick="openUnpublishPostModal(`{{postId}}`)"><i class="fas fa-download fa-2x"></i></a></span>
+                <span class="mr-3"> <a class="text-secondary" href="/post/edit/{{postId}}"><i class="fas fa-edit fa-2x"></i></a></span>
+                <span class="mr-1"> <a class="text-danger" onclick="openDeletePostModal(`{{postId}}`)"><i class="fas fa-trash-alt fa-2x"></i></a></span>
               </p>
             </div>
             <div class="col-auto d-none d-lg-block">
@@ -69,10 +69,10 @@
               <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
               <p class="card-text mb-auto">{{postDescription}}</p>
               <p class="mb-0">
-                <span class="mr-2"> <a class="text-success" href="/post/{{postId}}"><i class="fas fa-binoculars fa-2x"></i></a></span>
-                <span class="mr-2"> <a class="text-secondary" href="/post/publish/{{postId}}"><i class="fas fa-upload fa-2x"></i></a></span>
-                <span class="mr-2"> <a class="text-secondary" href="/post/edit/{{postId}}"><i class="fas fa-edit fa-2x"></i></a></span>
-                <span class="mr-1"> <a class="text-danger" href="/post/delete/{{postId}}"><i class="fas fa-trash-alt fa-2x"></i></a></span>
+                <span class="mr-3"> <a class="text-success" href="/post/{{postId}}"><i class="fas fa-binoculars fa-2x"></i></a></span>
+                <span class="mr-3"> <a class="text-info" onclick="openPublishPostModal(`{{postId}}`)"><i class="fas fa-upload fa-2x"></i></a></span>
+                <span class="mr-3"> <a class="text-secondary" href="/post/edit/{{postId}}"><i class="fas fa-edit fa-2x"></i></a></span>
+                <span class="mr-1"> <a class="text-danger" onclick="openDeletePostModal(`{{postId}}`)"><i class="fas fa-trash-alt fa-2x"></i></a></span>
               </p>
             </div>
             <div class="col-auto d-none d-lg-block">
@@ -84,7 +84,83 @@
   {{/if}}
   {{/each}}
   </div>
-
-
-
 </div>
+
+<div class="modal fade" id="confirmDeletePostModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="deletePostModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-weight-bold text-danger" id="deletePostModalLabel"><i class="fas fa-exclamation-circle text-danger"></i> Delete Post ?</h5>
+      </div>
+      <div class="modal-body">
+          <p>Are you sure you want to delete this post ?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
+        <a type="button" class="btn btn-outline-secondary" id="deletePostBtn">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmPublishPostModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="publishPostModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-weight-bold" id="publishPostModalLabel"><i class="fas fa-exclamation-circle text-danger"></i> Publish Post ?</h5>
+      </div>
+      <div class="modal-body">
+          <p>Are you sure you want to publish this post ?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
+        <a type="button" class="btn btn-outline-secondary" id="publishPostBtn">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmUnpublishPostModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="unpublishPostModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-weight-bold" id="unpublishPostModalLabel"><i class="fas fa-exclamation-circle text-danger"></i> Unpublish Post ?</h5>
+      </div>
+      <div class="modal-body">
+          <p>Are you sure you want to unpublish this post ? Post will be remove from public view.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
+        <a type="button" class="btn btn-outline-secondary" id="unpublishPostBtn">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+
+function openDeletePostModal(postId) {
+    $('#confirmDeletePostModal').modal({
+        backdrop: false
+    });
+    $('#confirmDeletePostModal').modal('show');
+    $('#deletePostBtn').attr('href', '/post/delete/' + postId)
+}
+
+function openPublishPostModal(postId) {
+    $('#confirmPublishPostModal').modal({
+        backdrop: false
+    });
+    $('#confirmPublishPostModal').modal('show');
+    $('#publishPostBtn').attr('href', '/post/publish/' + postId)
+}
+
+function openUnpublishPostModal(postId) {
+    $('#confirmUnpublishPostModal').modal({
+        backdrop: false
+    });
+    $('#confirmUnpublishPostModal').modal('show');
+    $('#unpublishPostBtn').attr('href', '/post/unpublish/' + postId)
+}
+
+</script>

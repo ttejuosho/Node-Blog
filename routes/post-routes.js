@@ -17,9 +17,9 @@ module.exports = function(app) {
 
     app.get('/post/edit/:postId', postController.getEditPost);
     app.post('/post/edit/:postId', postController.updatePost);
-    
-    // app.get('/postdelete/:postId', postController.deletePost);
 
-    // app.get('/postpublish/:postId', postController.publishPost);
-    // app.get('/postunpublish/:postId', postController.unpublishPost);
+    app.get('/post/delete/:postId', postController.deletePost);
+
+    app.get('/post/publish/:postId', postController.publishPost);
+    app.get('/post/unpublish/:postId', postController.unpublishPost);
 }
