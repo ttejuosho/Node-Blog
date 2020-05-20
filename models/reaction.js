@@ -1,19 +1,22 @@
 module.exports = (sequelize, DataTypes) => { 
-    const Subscriber = sequelize.define('Subscriber', {
-        subscriberId: {
+    const Reaction = sequelize.define('Reaction', {
+        reactionId: {
             type: DataTypes.UUID,
             primaryKey: true,
             defaultValue: DataTypes.UUIDV4,
+        },
+        reaction: {
+            type: DataTypes.STRING,
+            allowNull: false,
           },
-          subscriberName: {
+        userId: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        subscriberEmail: {
+        postId: {
             type: DataTypes.STRING,
             allowNull: false,
-            isEmail: true,
         }
     });
-    return Subscriber;
+    return Reaction;
 };
