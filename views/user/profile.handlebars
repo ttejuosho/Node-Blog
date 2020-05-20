@@ -28,37 +28,37 @@
 {{!-- <p class="display-4 font-weight-bold">Posts</p> --}}
 <div class="tab-content">
   <div id="posts" class="tab-pane fade show active" role="tabpanel" aria-labelledby="posts-tab">
-
-    {{#each Posts}} {{#if published}}
-      <div class="row mb-2">
-        <div class="col-md-12">
-          <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-            <div class="col p-4 d-flex flex-column position-static">
-              <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
-              <h3 class="mb-0">{{postTitle}}</h3>
-              <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
-              <p class="card-text mb-auto">{{postDescription}}</p>
-              <small class="form-text text-muted mb-2">Viewed {{viewCount}} times</small>
-              <p class="mb-0">
-                <span class="mr-3"> <a class="text-success" href="/post/{{postId}}"><i class="fas fa-binoculars fa-2x"></i></a></span>
-                <span class="mr-3"> <a class="text-info" onclick="openUnpublishPostModal(`{{postId}}`)"><i class="fas fa-download fa-2x"></i></a></span>
-                <span class="mr-3"> <a class="text-secondary" href="/post/edit/{{postId}}"><i class="fas fa-edit fa-2x"></i></a></span>
-                <span class="mr-1"> <a class="text-danger" onclick="openDeletePostModal(`{{postId}}`)"><i class="fas fa-trash-alt fa-2x"></i></a></span>
-              </p>
-            </div>
-            <div class="col-auto d-none d-lg-block">
-              <img src="{{postImage}}" style="height: 250px; width: 350px;" />
+    {{#unless Posts}}<p> This user has no posts yet. </p> <p><a href="/newPost">Click here to start writing</a></p>{{/unless}}
+    {{#each Posts}} 
+      {{#if published}}
+        <div class="row mb-2">
+          <div class="col-md-12">
+            <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+              <div class="col p-4 d-flex flex-column position-static">
+                <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
+                <h3 class="mb-0">{{postTitle}}</h3>
+                <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
+                <p class="card-text mb-auto">{{postDescription}}</p>
+                <small class="form-text text-muted mb-2">Viewed {{viewCount}} times</small>
+                <p class="mb-0">
+                  <span class="mr-3"> <a class="text-success" href="/post/{{postId}}"><i class="fas fa-binoculars fa-2x"></i></a></span>
+                  <span class="mr-3"> <a class="text-info" onclick="openUnpublishPostModal(`{{postId}}`)"><i class="fas fa-download fa-2x"></i></a></span>
+                  <span class="mr-3"> <a class="text-secondary" href="/post/edit/{{postId}}"><i class="fas fa-edit fa-2x"></i></a></span>
+                  <span class="mr-1"> <a class="text-danger" onclick="openDeletePostModal(`{{postId}}`)"><i class="fas fa-trash-alt fa-2x"></i></a></span>
+                </p>
+              </div>
+              <div class="col-auto d-none d-lg-block">
+                <img src="{{postImage}}" style="height: 250px; width: 350px;" />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      {{!-- {{else}}
-        <p> This user has no posts yet. </p> --}}
       {{/if}}
     {{/each}}
   </div>
 
-  <div id="drafts" class="tab-pane fade" role="tabpanel" aria-labelledby="drafts-tab">        
+  <div id="drafts" class="tab-pane fade" role="tabpanel" aria-labelledby="drafts-tab">      
+    {{#unless Posts}} <p> Nothing in the works yet. </p> <p><a href="/newPost">Click here to start writing</a></p>{{/unless}}  
     {{#each Posts}} {{#if isDraft}}
     <div class="row mb-2">
         <div class="col-md-12">

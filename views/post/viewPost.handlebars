@@ -1,23 +1,43 @@
-
 <main role="main" class="container">
   <div class="row">
     <div class="col-md-8 blog-main">
-      
+
       <div class="blog-post">
         <h2 class="blog-post-title">{{postTitle}}</h2>
         <img class="mt-2 mb-2" src="{{postImage}}" style="width: 100%;">
-        <p class="blog-post-meta">{{#formatDate createdAt}} {{/formatDate}} by <a href="/profile/{{username}}">{{name}}</a></p>
+        <p class="blog-post-meta">{{#formatDate createdAt}} {{/formatDate}} by <a
+            href="/profile/{{username}}">{{name}}</a></p>
 
         {{{postBody}}}
+
+        <p class="float-right">
+          <span id="thumbsUp" class="mr-4 pointer" data-toggle="tooltip" data-placement="bottom" title="Like post"
+            onclick="reactToPost(`like`, `{{postId}}`)">
+            <i class="far fa-thumbs-up fa-2x text-dark mr-2"></i><small
+              class="likesCount text-success">{{likesCount}}</small>
+          </span>
+          <span id="thumbsDown" class="pointer" data-toggle="tooltip" data-placement="bottom" title="Dislike post"
+            onclick="reactToPost(`dislike`, `{{postId}}`)">
+            <i class="far fa-thumbs-down fa-2x text-dark mr-2"></i><small
+              class="dislikesCount text-danger">{{dislikesCount}}</small>
+          </span>
+        </p>
       </div><!-- /.blog-post -->
+
+      <div class="blog-post">
+        <h4>Comments</h4>
+        {{#unless Reactions}} <p>No user has commented on this post for now.</p> {{/unless}}
+        {{#if isAuthenticated}}
+        {{/if}}
+      </div>
 
       <div class="blog-post">
         <h4>Subscribe to more posts from {{shortName}}</h4>
         <form class="form-inline" method="POST" action="/subscribe/{{username}}">
-        <label class="sr-only" for="subscribeEmail">Email Address</label>
-        <input type="email" class="form-control mb-2 mr-sm-2" id="subscribeEmail" placeholder="Email address">
+          <label class="sr-only" for="subscribeEmail">Email Address</label>
+          <input type="email" class="form-control mb-2 mr-sm-2" id="subscribeEmail" placeholder="Email address">
 
-        <button type="submit" class="btn btn-secondary mb-2">Subscribe</button>
+          <button type="submit" class="btn btn-secondary mb-2">Subscribe</button>
         </form>
       </div><!-- /.blog-post -->
 
@@ -50,29 +70,57 @@
       <div class="p-4">
         <h4 class="font-italic">Find {{shortName}} elsewhere</h4>
         <p class="mt-2">
-            <span class="mr-2"> <a class="text-dark" href="https://www.facebook.com/{{facebook}}" target="_blank"><i class="fab fa-facebook fa-2x"></i></a></span> 
-            <span class="mr-2"> <a class="text-dark" href="https://www.linkedin.com/in/{{linkedIn}}" target="_blank"><i class="fab fa-linkedin fa-2x"></i></a></span> 
-            <span class="mr-2"> <a class="text-dark" href="https://www.twitter.com/{{twitter}}" target="_blank"><i class="fab fa-twitter fa-2x"></i></a></span>
-            <span class="mr-2"> <a class="text-dark" href="https://www.github.com/{{github}}" target="_blank"><i class="fab fa-github fa-2x"></i></a></span>
+          <span class="mr-2"> <a class="text-dark" href="https://www.facebook.com/{{facebook}}" target="_blank"><i
+                class="fab fa-facebook fa-2x"></i></a></span>
+          <span class="mr-2"> <a class="text-dark" href="https://www.linkedin.com/in/{{linkedIn}}" target="_blank"><i
+                class="fab fa-linkedin fa-2x"></i></a></span>
+          <span class="mr-2"> <a class="text-dark" href="https://www.twitter.com/{{twitter}}" target="_blank"><i
+                class="fab fa-twitter fa-2x"></i></a></span>
+          <span class="mr-2"> <a class="text-dark" href="https://www.github.com/{{github}}" target="_blank"><i
+                class="fab fa-github fa-2x"></i></a></span>
         </p>
       </div>
     </aside><!-- /.blog-sidebar -->
 
   </div><!-- /.row -->
 
-    <!-- Then put toasts within -->
-    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-header">
-        <img src="..." class="rounded mr-2" alt="...">
-        <strong class="mr-auto">Bootstrap</strong>
-        <small class="text-muted">just now</small>
-        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="toast-body">
-        See? Just like this.
-      </div>
+  <!-- Then put toasts within -->
+  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <img src="..." class="rounded mr-2" alt="...">
+      <strong class="mr-auto">Bootstrap</strong>
+      <small class="text-muted">just now</small>
+      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
     </div>
+    <div class="toast-body">
+      See? Just like this.
+    </div>
+  </div>
 
 </main>
+
+<script type="text/javascript">
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+
+  function reactToPost(reaction, postId) {
+    fetch(`/api/react/${reaction}/${postId}`).then(response => response.json())
+      .then((data) => {
+        if (data.count){
+          if (reaction === 'like') { 
+            $('.likesCount').text(data.count); 
+            //$('#thumbsUp').attr('onclick', ''); 
+            } else {
+            $('.dislikesCount').text(data.count);
+            //$('#thumbsDown').attr('onclick', '');
+          }
+        } else {
+          console.log(data.response);
+        }
+
+      });
+  }
+</script>
