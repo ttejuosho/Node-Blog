@@ -69,7 +69,11 @@ module.exports = (sequelize, DataTypes) => {
     github: {
       type: DataTypes.STRING,
       allowNull: true,
-    }
+    },
+    followerCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
   });
   // {
   //   defaultScope: {
@@ -81,7 +85,7 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Post, {
       onDelete: 'cascade',
     });
-    User.hasMany(models.Subscriber, {
+    User.hasMany(models.Follower, {
       onDelete: 'cascade',
     });
   };
