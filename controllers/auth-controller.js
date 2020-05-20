@@ -137,7 +137,7 @@ exports.signup = (req, res, next) => {
       error: "Passwords dont match",
       emailAddress: req.body.emailAddress,
       name: req.body.name,
-      shortName: user.body.shortName,
+      shortName: req.body.shortName,
       username: req.body.username,
       phoneNumber: req.body.phoneNumber,
     });
