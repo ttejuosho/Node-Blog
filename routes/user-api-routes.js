@@ -97,22 +97,37 @@ module.exports = (app) => {
       db.User.findByPk(req.params.userId)
         .then((dbUser) => {
           if (dbUser !== null) {
-            db.Follower.create({
-              followedUserId: req.params.userId,
-              UserUserId: req.user.userId,
+            db.Follower.findOne({
+              where: {
+                followedUserId: req.params.userId,
+                UserUserId: req.user.userId,
+              },
             })
               .then((dbFollower) => {
-                db.User.increment(
-                  { followerCount: 1 },
-                  { where: { userId: req.params.userId } }
-                );
-                res.json(dbFollower);
+                if (dbFollower === null) {
+                  db.Follower.create({
+                    followedUserId: req.params.userId,
+                    UserUserId: req.user.userId,
+                  })
+                    .then((dbFollower) => {
+                      db.User.increment(
+                        { followerCount: 1 },
+                        { where: { userId: req.params.userId } }
+                      );
+                      res.json(dbFollower);
+                    })
+                    .catch((err) => {
+                      res.json(err);
+                    });
+                } else {
+                  res.json({ response: "Youre already following this user." });
+                }
               })
               .catch((err) => {
                 res.json(err);
               });
           } else {
-            res.json({ error: 'User not found' });
+            res.json({ error: "User not found" });
           }
         })
         .catch((err) => {
@@ -123,55 +138,58 @@ module.exports = (app) => {
 
   // Get all followers for a user
   app.get("/api/getFollowers/:userId", (req, res) => {
-    db.User.findByPk(req.params.userId).then((dbUser)=>{
-      if(dbUser !== null){
-        db.Follower.findAll({
-          where: {
-            followedUserId: req.params.userId,
-          },
-        })
-          .then((dbFollower) => {
-            res.json(dbFollower);
+    db.User.findByPk(req.params.userId)
+      .then((dbUser) => {
+        if (dbUser !== null) {
+          db.Follower.findAll({
+            where: {
+              followedUserId: req.params.userId,
+            },
           })
-          .catch((err) => {
-            res.json(err);
-          });
-      } else {
-        res.json('User not found');
-      }
-    })
-    .catch((err) => {
-      res.json(err);
-    });
+            .then((dbFollower) => {
+              res.json(dbFollower);
+            })
+            .catch((err) => {
+              res.json(err);
+            });
+        } else {
+          res.json("User not found");
+        }
+      })
+      .catch((err) => {
+        res.json(err);
+      });
   });
 
   // Get Users that a user is following
   app.get("/api/getFollowing/:userId", (req, res) => {
-    db.User.findByPk(req.params.userId).then((dbUser)=>{
-      if(dbUser !== null){
-        db.Follower.findAll({
-          where: {
-            UserUserId: req.params.userId,
-          },
-          include: [{
-            model: db.User,
-            as: 'User',
-            attributes: [ 'name', 'shortName', 'emailAdress', 'username' ]
-          }]
-        })
-          .then((dbFollower) => {
-            res.json(dbFollower);
+    db.User.findByPk(req.params.userId)
+      .then((dbUser) => {
+        if (dbUser !== null) {
+          db.Follower.findAll({
+            where: {
+              UserUserId: req.params.userId,
+            },
+            include: [
+              {
+                model: db.User,
+                as: "User",
+                attributes: ["name", "shortName", "emailAdress", "username"],
+              },
+            ],
           })
-          .catch((err) => {
-            res.json(err);
-          });
-      } else {
-        res.json({ error: 'User not found' });
-      }
-    })
-    .catch((err) => {
-      res.json(err);
-    });
+            .then((dbFollower) => {
+              res.json(dbFollower);
+            })
+            .catch((err) => {
+              res.json(err);
+            });
+        } else {
+          res.json({ error: "User not found" });
+        }
+      })
+      .catch((err) => {
+        res.json(err);
+      });
   });
-
 };

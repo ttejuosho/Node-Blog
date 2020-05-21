@@ -67,11 +67,26 @@ exports.getPost = (req, res) => {
         ],
       },
       {
-        model: db.Reaction,
+        model: db.Comment,
         limit: 10,
-        as: 'Reactions',
-        attributes: ['reactionId', 'reactionBody', 'likesCount', 'dislikesCount'],
-      }
+        as: "Comments",
+        attributes: [
+          "commentId",
+          "commentBody",
+          "likesCount",
+          "dislikesCount",
+          "UserUserId",
+          "PostPostId",
+          "createdAt",
+        ],
+        include: [
+          {
+            model: db.User,
+            as: "User",
+            attributes: ["userId","username", "name", "shortName"],
+          },
+        ],
+      },
     ],
   })
     .then((dbPost) => {
@@ -98,8 +113,14 @@ exports.getPost = (req, res) => {
           facebook: dbPost.User.dataValues.facebook,
           twitter: dbPost.User.dataValues.twitter,
           github: dbPost.User.dataValues.github,
+          Comments: [],
         };
 
+        for (var i = 0; i < dbPost.dataValues.Comments.length; i++) {
+          hbsObject.Comments.push(dbPost.dataValues.Comments[i].dataValues);
+          hbsObject.Comments[i].commentBy = dbPost.dataValues.Comments[i].User.dataValues.name;
+          hbsObject.Comments[i].commentByUserId = dbPost.dataValues.Comments[i].User.dataValues.userId;
+        }
         //When not signed in or another user is viewing post, ViewCount increment
         if (
           !req.isAuthenticated ||
@@ -110,8 +131,7 @@ exports.getPost = (req, res) => {
             { where: { postId: req.params.postId } }
           );
         }
-
-        //console.log(hbsObject);
+        console.log(hbsObject.Comments);
         return res.render("post/viewPost", hbsObject);
       } else {
         return res.render("post/viewPost", { message: "Not Found" });
@@ -295,37 +315,48 @@ exports.deletePost = (req, res) => {
 exports.newReaction = (req, res) => {
   db.Post.findByPk(req.params.postId).then((dbPost) => {
     if (dbPost !== null) {
-      db.Reaction.create({ reactionBody: req.body.reactionBody }).then(
-        (dbReaction) => {
-          db.Post.increment({ reactionCount: 1 }, { where: { postId: req.params.postId }});
+      db.Reaction.create({ reactionBody: req.body.reactionBody })
+        .then((dbReaction) => {
+          db.Post.increment(
+            { reactionCount: 1 },
+            { where: { postId: req.params.postId } }
+          );
           db.Post.findByPk(req.params.postId, {
             include: [
               {
                 model: db.Reaction,
                 limit: 10,
-                as: 'Reaction',
-                attributes: ['reactionId', 'reactionBody', 'likesCount', 'dislikesCount'],
-              }
-            ]
-          }).then((dbPost) => {
-            var hbsObject = {
-              postId: dbPost.dataValues.postId,
-              postTitle: dbPost.dataValues.postTitle,
-              postBody: dbPost.dataValues.postBody,
-              postCategory: dbPost.dataValues.postCategory,
-              postDescription: dbPost.dataValues.postDescription,
-              postImage: dbPost.dataValues.postImage,
-              isDraft: dbPost.dataValues.isDraft,
-              published: dbPost.dataValues.published,
-              viewCount: dbPost.dataValues.viewCount,
-              reactionCount: dbPost.dataValues.reactionCount,
-              createdAt: dbPost.dataValues.createdAt,
-            };
-            res.render("post/viewPost", hbsObject);
-          }).catch((err) => {
-            res.render("error", { error: err });
-          });
-        }).catch((err) => {
+                as: "Reaction",
+                attributes: [
+                  "reactionId",
+                  "reactionBody",
+                  "likesCount",
+                  "dislikesCount",
+                ],
+              },
+            ],
+          })
+            .then((dbPost) => {
+              var hbsObject = {
+                postId: dbPost.dataValues.postId,
+                postTitle: dbPost.dataValues.postTitle,
+                postBody: dbPost.dataValues.postBody,
+                postCategory: dbPost.dataValues.postCategory,
+                postDescription: dbPost.dataValues.postDescription,
+                postImage: dbPost.dataValues.postImage,
+                isDraft: dbPost.dataValues.isDraft,
+                published: dbPost.dataValues.published,
+                viewCount: dbPost.dataValues.viewCount,
+                reactionCount: dbPost.dataValues.reactionCount,
+                createdAt: dbPost.dataValues.createdAt,
+              };
+              res.render("post/viewPost", hbsObject);
+            })
+            .catch((err) => {
+              res.render("error", { error: err });
+            });
+        })
+        .catch((err) => {
           res.render("error", { error: err });
         });
     }
@@ -335,11 +366,13 @@ exports.newReaction = (req, res) => {
 exports.getReactions = (req, res) => {
   db.Reaction.findAll({
     where: {
-      PostPostId: req.params.postId
-    }
-  }).then((dbReaction)=>{
-    res.render('post/reactions', dbReaction.dataValues);
-  }).catch((err) => {
-    res.render("error", { error: err });
-  });
-}
+      PostPostId: req.params.postId,
+    },
+  })
+    .then((dbReaction) => {
+      res.render("post/reactions", dbReaction.dataValues);
+    })
+    .catch((err) => {
+      res.render("error", { error: err });
+    });
+};

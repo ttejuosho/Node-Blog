@@ -6,4 +6,6 @@ module.exports = function(app) {
     app.get('/profile', Security.isLoggedIn , userController.getProfilePage);
     app.get('/profile/:username', userController.getPublicProfilePage);
     app.get('/follow/:userId', Security.isLoggedIn, userController.follow);
+    app.get('/@:username', userController.getPublicProfilePage);
+
 }
