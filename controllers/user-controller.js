@@ -46,6 +46,7 @@ exports.getProfilePage = (req, res) => {
         for (var i = 0; i < dbPost.length; i++) {
           hbsObject.Posts.push(dbPost[i].dataValues);
         }
+        hbsObject.isOwner = true;
         res.render("user/profile", hbsObject);
       }
     })
@@ -63,6 +64,10 @@ exports.getPublicProfilePage = (req, res) => {
       {
         model: db.Post,
         as: "Posts",
+        where: {
+          deleted: false,
+          published: true,
+        },
         attributes: [
           "postId",
           "postTitle",
@@ -75,12 +80,22 @@ exports.getPublicProfilePage = (req, res) => {
           "createdAt",
         ],
       },
+      {
+        model: db.Follower,
+        as: 'Followers',
+        where: {
+          followedUserId: req.params.userId,
+          UserUserId: req.user.userId
+        },
+        attributes: [ "followedUserId", "UserUserId" ]
+      }
     ],
   })
     .then((dbUser) => {
       if (dbUser !== null) {
         const hbsObject = dbUser.toJSON();
         hbsObject.title = "@" + hbsObject.username;
+        hbsObject.isOwner = false;
         res.render("user/profile", hbsObject);
       }
     })
@@ -89,19 +104,46 @@ exports.getPublicProfilePage = (req, res) => {
     });
 };
 
-exports.follow = (req,res) => {
-    db.User.findByPk(req.params.userId).then((dbUser)=>{
-        if(dbUser !== null){
-            db.Follower.create({ followedUserId: req.params.userId }).then((dbFollower)=>{
-                db.User.increment({ followerCount: 1 }, { where: { userId: req.params.userId }});
-                res.redirect('/profile');
-            }).catch((err)=>{
-                res.render("error", { error: 'Couldnt complete the follow operation' });
-            });
+exports.follow = (req, res) => {
+  if (req.params.userId) {
+    db.User.findByPk(req.params.userId)
+      .then((dbUser) => {
+        if (dbUser !== null) {
+          db.Follower.findOne({
+            where: {
+              followedUserId: req.params.userId,
+              UserUserId: req.user.userId,
+            },
+          }).then((dbFollower) => {
+            if (dbFollower === null) {
+              db.Follower.create({
+                followedUserId: req.params.userId,
+                UserUserId: req.user.userId,
+              })
+                .then((dbFollower) => {
+                  db.User.increment(
+                    { followerCount: 1 },
+                    { where: { userId: req.params.userId } }
+                  );
+                  res.redirect("/profile");
+                })
+                .catch((err) => {
+                  res.render("error", {
+                    error: "Couldnt complete the follow operation",
+                  });
+                });
+            } else {
+              res.json({ response: "Youre already following this user." });
+            }
+          });
         } else {
-            res.redirect('/profile');
+          res.redirect("/profile");
         }
-    }).catch((err)=>{
-        res.render("error", { error: 'Error getting user info' });
-    });
+      })
+      .catch((err) => {
+        res.render("error", { error: "Error getting user info" });
+      });
+  } else {
+    res.redirect("/signin");
+  }
 };
