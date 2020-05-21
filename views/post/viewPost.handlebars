@@ -13,12 +13,12 @@
         <p class="float-right">
           <span id="thumbsUp" class="mr-4 pointer" data-toggle="tooltip" data-placement="bottom" title="Like post"
             onclick="reactToPost(`like`, `{{postId}}`)">
-            <i class="far fa-thumbs-up fa-2x text-dark mr-2"></i><small
+            <i class="far fa-thumbs-up fa-2x mr-2"></i><small
               class="likesCount text-success">{{likesCount}}</small>
           </span>
           <span id="thumbsDown" class="pointer" data-toggle="tooltip" data-placement="bottom" title="Dislike post"
             onclick="reactToPost(`dislike`, `{{postId}}`)">
-            <i class="far fa-thumbs-down fa-2x text-dark mr-2"></i><small
+            <i class="far fa-thumbs-down fa-2x mr-2"></i><small
               class="dislikesCount text-danger">{{dislikesCount}}</small>
           </span>
         </p>
@@ -26,9 +26,13 @@
 
       <div class="blog-post">
         <h4>Comments</h4>
-        {{#unless Reactions}} <p>No user has commented on this post for now.</p> {{/unless}}
-        {{#if isAuthenticated}}
-        {{/if}}
+        {{#unless Comments}} <p>No user has commented on this post for now.</p> {{/unless}}
+        {{#each Comments}} 
+          <p>{{commentBody}}</p>
+          <p>{{#formatDate createdAt}} {{/formatDate}}</p>
+          <p>By {{commentBy}}</p>
+          <p>{{commentByUserId}}</p>
+        {{/each}}
       </div>
 
       <div class="blog-post">
@@ -107,20 +111,23 @@
   });
 
   function reactToPost(reaction, postId) {
+    var reVal = reaction;
     fetch(`/api/react/${reaction}/${postId}`).then(response => response.json())
       .then((data) => {
-        if (data.count){
-          if (reaction === 'like') { 
-            $('.likesCount').text(data.count); 
-            //$('#thumbsUp').attr('onclick', ''); 
-            } else {
-            $('.dislikesCount').text(data.count);
-            //$('#thumbsDown').attr('onclick', '');
-          }
+        if (!data.response) {
+          $('.likesCount').text(data.likesCount);
+          $('.dislikesCount').text(data.dislikesCount);
+          $('#thumbsUp').removeClass('text-danger');
+          $('#thumbsDown').removeClass('text-danger');
         } else {
-          console.log(data.response);
+          if (reaction === 'like'){
+            $('#thumbsUp').addClass('text-danger');
+            $('#thumbsDown').removeClass('text-danger');
+          } else {
+            $('#thumbsUp').removeClass('text-danger');
+            $('#thumbsDown').addClass('text-danger');
+          }
         }
-
       });
   }
 </script>

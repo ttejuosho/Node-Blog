@@ -1,99 +1,123 @@
 <div class="row mt-3 mb-3">
 
-    <div class="col-md-5"><img class="img-fluid mx-auto profileImage" src="{{profileImage}}" /></div>
+  <div class="col-md-5"><img class="img-fluid mx-auto profileImage" src="{{profileImage}}" /></div>
 
-    <div class="col-md-7">
-        <h3 class="display-4">{{name}}</h3>
-        <h6>{{#if loggedinUser}} @{{loggedinUser}} {{else}} @{{username}} {{/if}}</h6>
-        <p class="lead">{{tagline}}</p>
-        <p>{{about}}</p>
-        <h6>Member Since: {{#formatDate memberSince}} {{/formatDate}}</h6>
-        <p class="mt-5"> 
-            <span class="mr-2"> <a class="text-dark" href="https://www.facebook.com/{{facebook}}" target="_blank"><i class="fab fa-facebook fa-2x"></i></a></span> 
-            <span class="mr-2"> <a class="text-dark" href="https://www.linkedin.com/in/{{linkedIn}}" target="_blank"><i class="fab fa-linkedin fa-2x"></i></a></span> 
-            <span class="mr-2"> <a class="text-dark" href="https://www.twitter.com/{{twitter}}" target="_blank"><i class="fab fa-twitter fa-2x"></i></a></span>
-            <span class="mr-2"> <a class="text-dark" href="mailto:{{emailAddress}}"><i class="fas fa-envelope fa-2x"></i></a></span>
-        </p>
-    </div>
+  <div class="col-md-7">
+    <h3 class="display-4">{{name}}</h3>
+    <h6>{{#if loggedinUser}} @{{loggedinUser}} {{else}} @{{username}} {{/if}}</h6>
+    <p class="lead">{{tagline}}</p>
+    <p>{{about}}</p>
+    <h6>Member Since: {{#formatDate memberSince}} {{/formatDate}}</h6>
+    <p class="mt-5">
+      <span class="mr-2"> <a class="text-dark" href="https://www.facebook.com/{{facebook}}" target="_blank"><i
+            class="fab fa-facebook fa-2x"></i></a></span>
+      <span class="mr-2"> <a class="text-dark" href="https://www.linkedin.com/in/{{linkedIn}}" target="_blank"><i
+            class="fab fa-linkedin fa-2x"></i></a></span>
+      <span class="mr-2"> <a class="text-dark" href="https://www.twitter.com/{{twitter}}" target="_blank"><i
+            class="fab fa-twitter fa-2x"></i></a></span>
+      <span class="mr-2"> <a class="text-dark" href="mailto:{{emailAddress}}"><i
+            class="fas fa-envelope fa-2x"></i></a></span>
+    </p>
+  </div>
 
 </div>
 <hr class="bloget-divider">
 
 <ul class="nav nav-tabs mb-1" role="tablist">
-  <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark active" id="posts-tab" data-toggle="tab" href="#posts" aria-controls="posts" aria-selected="true">Posts</a></li>
-  <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark" id="drafts-tab" data-toggle="tab" href="#drafts" aria-controls="drafts" aria-selected="false">Drafts</a></li>
+  <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark active" id="posts-tab" data-toggle="tab"
+      href="#posts" aria-controls="posts" aria-selected="true">Posts</a></li>
+      {{#ifEquals isOwner true}}
+  <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark" id="drafts-tab" data-toggle="tab"
+      href="#drafts" aria-controls="drafts" aria-selected="false">Drafts</a></li>
+      {{/ifEquals}}
 </ul>
 
 
 {{!-- <p class="display-4 font-weight-bold">Posts</p> --}}
 <div class="tab-content">
   <div id="posts" class="tab-pane fade show active" role="tabpanel" aria-labelledby="posts-tab">
-    {{#unless Posts}}<p> This user has no posts yet. </p> <p><a href="/newPost">Click here to start writing</a></p>{{/unless}}
-    {{#each Posts}} 
-      {{#if published}}
-        <div class="row mb-2">
-          <div class="col-md-12">
-            <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-              <div class="col p-4 d-flex flex-column position-static">
-                <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
-                <h3 class="mb-0">{{postTitle}}</h3>
-                <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
-                <p class="card-text mb-auto">{{postDescription}}</p>
-                <small class="form-text text-muted mb-2">Viewed {{viewCount}} times</small>
-                <p class="mb-0">
-                  <span class="mr-3"> <a class="text-success" href="/post/{{postId}}"><i class="fas fa-binoculars fa-2x"></i></a></span>
-                  <span class="mr-3"> <a class="text-info" onclick="openUnpublishPostModal(`{{postId}}`)"><i class="fas fa-download fa-2x"></i></a></span>
-                  <span class="mr-3"> <a class="text-secondary" href="/post/edit/{{postId}}"><i class="fas fa-edit fa-2x"></i></a></span>
-                  <span class="mr-1"> <a class="text-danger" onclick="openDeletePostModal(`{{postId}}`)"><i class="fas fa-trash-alt fa-2x"></i></a></span>
-                </p>
-              </div>
-              <div class="col-auto d-none d-lg-block">
-                <img src="{{postImage}}" style="height: 250px; width: 350px;" />
-              </div>
-            </div>
+    {{#unless Posts}}<p> This user has no posts yet. </p>
+    <p><a href="/newPost">Click here to start writing</a></p>{{/unless}}
+    {{#each Posts}}
+    {{#if published}}
+    <div class="row mb-2">
+      <div class="col-md-12">
+        <div
+          class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+          <div class="col p-4 d-flex flex-column position-static">
+            <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
+            <h3 class="mb-0">{{postTitle}}</h3>
+            <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
+            <p class="card-text mb-auto">{{postDescription}}</p>
+            <small class="form-text text-muted mb-2">Viewed {{viewCount}} times</small>
+            <p class="mb-0">
+              <span class="mr-3"> <a class="text-success" href="/post/{{postId}}"><i
+                    class="fas fa-binoculars fa-2x"></i></a></span>
+              <span class="mr-3"> <a class="text-info" onclick="openUnpublishPostModal(`{{postId}}`)"><i
+                    class="fas fa-download fa-2x"></i></a></span>
+              <span class="mr-3"> <a class="text-secondary" href="/post/edit/{{postId}}"><i
+                    class="fas fa-edit fa-2x"></i></a></span>
+              <span class="mr-1"> <a class="text-danger" onclick="openDeletePostModal(`{{postId}}`)"><i
+                    class="fas fa-trash-alt fa-2x"></i></a></span>
+            </p>
+          </div>
+          <div class="col-auto d-none d-lg-block">
+            <img src="{{postImage}}" style="height: 250px; width: 350px;" />
           </div>
         </div>
-      {{/if}}
+      </div>
+    </div>
+    {{/if}}
     {{/each}}
   </div>
 
-  <div id="drafts" class="tab-pane fade" role="tabpanel" aria-labelledby="drafts-tab">      
-    {{#unless Posts}} <p> Nothing in the works yet. </p> <p><a href="/newPost">Click here to start writing</a></p>{{/unless}}  
+  {{#unless isOwner}}
+  <div id="drafts" class="tab-pane fade" role="tabpanel" aria-labelledby="drafts-tab">
+    {{#unless Posts}} <p> Nothing in the works yet. </p>
+    <p><a href="/newPost">Click here to start writing</a></p>{{/unless}}
     {{#each Posts}} {{#if isDraft}}
     <div class="row mb-2">
-        <div class="col-md-12">
-          <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-            <div class="col p-4 d-flex flex-column position-static">
-              <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
-              <h3 class="mb-0">{{postTitle}}</h3>
-              <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
-              <p class="card-text mb-auto">{{postDescription}}</p>
-              <p class="mb-0">
-                <span class="mr-3"> <a class="text-success" href="/post/{{postId}}"><i class="fas fa-binoculars fa-2x"></i></a></span>
-                <span class="mr-3"> <a class="text-info" onclick="openPublishPostModal(`{{postId}}`)"><i class="fas fa-upload fa-2x"></i></a></span>
-                <span class="mr-3"> <a class="text-secondary" href="/post/edit/{{postId}}"><i class="fas fa-edit fa-2x"></i></a></span>
-                <span class="mr-1"> <a class="text-danger" onclick="openDeletePostModal(`{{postId}}`)"><i class="fas fa-trash-alt fa-2x"></i></a></span>
-              </p>
-            </div>
-            <div class="col-auto d-none d-lg-block">
-              <img src="{{postImage}}" style="height: 250px;" />
-            </div>
+      <div class="col-md-12">
+        <div
+          class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+          <div class="col p-4 d-flex flex-column position-static">
+            <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
+            <h3 class="mb-0">{{postTitle}}</h3>
+            <div class="mb-1 text-muted">{{#formatDate createdAt}} {{/formatDate}}</div>
+            <p class="card-text mb-auto">{{postDescription}}</p>
+            <p class="mb-0">
+              <span class="mr-3"> <a class="text-success" href="/post/{{postId}}"><i
+                    class="fas fa-binoculars fa-2x"></i></a></span>
+              <span class="mr-3"> <a class="text-info" onclick="openPublishPostModal(`{{postId}}`)"><i
+                    class="fas fa-upload fa-2x"></i></a></span>
+              <span class="mr-3"> <a class="text-secondary" href="/post/edit/{{postId}}"><i
+                    class="fas fa-edit fa-2x"></i></a></span>
+              <span class="mr-1"> <a class="text-danger" onclick="openDeletePostModal(`{{postId}}`)"><i
+                    class="fas fa-trash-alt fa-2x"></i></a></span>
+            </p>
+          </div>
+          <div class="col-auto d-none d-lg-block">
+            <img src="{{postImage}}" style="height: 250px;" />
           </div>
         </div>
+      </div>
     </div>
-  {{/if}}
-  {{/each}}
+    {{/if}}
+    {{/each}}
   </div>
+  {{/unless}}
 </div>
 
-<div class="modal fade" id="confirmDeletePostModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="deletePostModalLabel" aria-hidden="true">
+<div class="modal fade" id="confirmDeletePostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+  role="dialog" aria-labelledby="deletePostModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title font-weight-bold text-danger" id="deletePostModalLabel"><i class="fas fa-exclamation-circle text-danger"></i> Delete Post ?</h5>
+        <h5 class="modal-title font-weight-bold text-danger" id="deletePostModalLabel"><i
+            class="fas fa-exclamation-circle text-danger"></i> Delete Post ?</h5>
       </div>
       <div class="modal-body">
-          <p>Are you sure you want to delete this post ?</p>
+        <p>Are you sure you want to delete this post ?</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
@@ -103,14 +127,16 @@
   </div>
 </div>
 
-<div class="modal fade" id="confirmPublishPostModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="publishPostModalLabel" aria-hidden="true">
+<div class="modal fade" id="confirmPublishPostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+  role="dialog" aria-labelledby="publishPostModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title font-weight-bold" id="publishPostModalLabel"><i class="fas fa-exclamation-circle text-danger"></i> Publish Post ?</h5>
+        <h5 class="modal-title font-weight-bold" id="publishPostModalLabel"><i
+            class="fas fa-exclamation-circle text-danger"></i> Publish Post ?</h5>
       </div>
       <div class="modal-body">
-          <p>Are you sure you want to publish this post ?</p>
+        <p>Are you sure you want to publish this post ?</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
@@ -120,14 +146,16 @@
   </div>
 </div>
 
-<div class="modal fade" id="confirmUnpublishPostModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="unpublishPostModalLabel" aria-hidden="true">
+<div class="modal fade" id="confirmUnpublishPostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+  role="dialog" aria-labelledby="unpublishPostModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title font-weight-bold" id="unpublishPostModalLabel"><i class="fas fa-exclamation-circle text-danger"></i> Unpublish Post ?</h5>
+        <h5 class="modal-title font-weight-bold" id="unpublishPostModalLabel"><i
+            class="fas fa-exclamation-circle text-danger"></i> Unpublish Post ?</h5>
       </div>
       <div class="modal-body">
-          <p>Are you sure you want to unpublish this post ? Post will be remove from public view.</p>
+        <p>Are you sure you want to unpublish this post ? Post will be remove from public view.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
@@ -139,28 +167,28 @@
 
 <script type="text/javascript">
 
-function openDeletePostModal(postId) {
+  function openDeletePostModal(postId) {
     $('#confirmDeletePostModal').modal({
-        backdrop: false
+      backdrop: false
     });
     $('#confirmDeletePostModal').modal('show');
     $('#deletePostBtn').attr('href', '/post/delete/' + postId)
-}
+  }
 
-function openPublishPostModal(postId) {
+  function openPublishPostModal(postId) {
     $('#confirmPublishPostModal').modal({
-        backdrop: false
+      backdrop: false
     });
     $('#confirmPublishPostModal').modal('show');
     $('#publishPostBtn').attr('href', '/post/publish/' + postId)
-}
+  }
 
-function openUnpublishPostModal(postId) {
+  function openUnpublishPostModal(postId) {
     $('#confirmUnpublishPostModal').modal({
-        backdrop: false
+      backdrop: false
     });
     $('#confirmUnpublishPostModal').modal('show');
     $('#unpublishPostBtn').attr('href', '/post/unpublish/' + postId)
-}
+  }
 
 </script>
