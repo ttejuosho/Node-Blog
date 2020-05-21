@@ -90,29 +90,29 @@ module.exports = (app) => {
   });
 
   // Follow a User
-  app.get("/api/follow/:userId", (req, res) => {
+  app.get("/api/follow/:username", (req, res) => {
     if (!req.user.userId) {
       return res.redirect("/signin");
     } else {
-      db.User.findByPk(req.params.userId)
+      db.User.findByPk(req.params.username)
         .then((dbUser) => {
           if (dbUser !== null) {
             db.Follower.findOne({
               where: {
-                followedUserId: req.params.userId,
+                followedUserUsername: req.params.username,
                 UserUserId: req.user.userId,
               },
             })
               .then((dbFollower) => {
                 if (dbFollower === null) {
                   db.Follower.create({
-                    followedUserId: req.params.userId,
+                    followedUserUsername: req.params.username,
                     UserUserId: req.user.userId,
                   })
                     .then((dbFollower) => {
                       db.User.increment(
                         { followerCount: 1 },
-                        { where: { userId: req.params.userId } }
+                        { where: { userId: req.params.username } }
                       );
                       res.json(dbFollower);
                     })
@@ -137,13 +137,13 @@ module.exports = (app) => {
   });
 
   // Get all followers for a user
-  app.get("/api/getFollowers/:userId", (req, res) => {
-    db.User.findByPk(req.params.userId)
+  app.get("/api/getFollowers/:username", (req, res) => {
+    db.User.findByPk(req.params.username)
       .then((dbUser) => {
         if (dbUser !== null) {
           db.Follower.findAll({
             where: {
-              followedUserId: req.params.userId,
+              followedUserUsername: req.params.username,
             },
           })
             .then((dbFollower) => {
@@ -162,7 +162,7 @@ module.exports = (app) => {
   });
 
   // Get Users that a user is following
-  app.get("/api/getFollowing/:userId", (req, res) => {
+  app.get("/api/getFollowing/:userid", (req, res) => {
     db.User.findByPk(req.params.userId)
       .then((dbUser) => {
         if (dbUser !== null) {

@@ -91,6 +91,9 @@ exports.getPost = (req, res) => {
   })
     .then((dbPost) => {
       if (dbPost !== null) {
+        if(dbPost.dataValues.deleted === true){
+          return res.render("post/viewPost", { message: "This post has been removed." });
+        }
         var hbsObject = {
           postId: dbPost.dataValues.postId,
           postTitle: dbPost.dataValues.postTitle,
@@ -105,14 +108,14 @@ exports.getPost = (req, res) => {
           dislikesCount: dbPost.dataValues.dislikesCount,
           userId: dbPost.dataValues.UserUserId,
           createdAt: dbPost.dataValues.createdAt,
-          username: dbPost.User.dataValues.username,
-          name: dbPost.User.dataValues.name,
-          shortName: dbPost.User.dataValues.shortName,
-          about: dbPost.User.dataValues.about,
-          linkedIn: dbPost.User.dataValues.linkedIn,
-          facebook: dbPost.User.dataValues.facebook,
-          twitter: dbPost.User.dataValues.twitter,
-          github: dbPost.User.dataValues.github,
+          postAuthorUsername: dbPost.User.dataValues.username,
+          postAuthorName: dbPost.User.dataValues.name,
+          postAuthorShortName: dbPost.User.dataValues.shortName,
+          postAuthorAbout: dbPost.User.dataValues.about,
+          postAuthorLinkedIn: dbPost.User.dataValues.linkedIn,
+          postAuthorFacebook: dbPost.User.dataValues.facebook,
+          postAuthorTwitter: dbPost.User.dataValues.twitter,
+          postAuthorGithub: dbPost.User.dataValues.github,
           Comments: [],
         };
 
@@ -121,6 +124,7 @@ exports.getPost = (req, res) => {
           hbsObject.Comments[i].commentBy = dbPost.dataValues.Comments[i].User.dataValues.name;
           hbsObject.Comments[i].commentByUserId = dbPost.dataValues.Comments[i].User.dataValues.userId;
         }
+
         //When not signed in or another user is viewing post, ViewCount increment
         if (
           !req.isAuthenticated ||
@@ -131,10 +135,10 @@ exports.getPost = (req, res) => {
             { where: { postId: req.params.postId } }
           );
         }
-        console.log(hbsObject.Comments);
+
         return res.render("post/viewPost", hbsObject);
       } else {
-        return res.render("post/viewPost", { message: "Not Found" });
+        return res.render("post/viewPost", { message: "Post not found" });
       }
     })
     .catch((err) => {

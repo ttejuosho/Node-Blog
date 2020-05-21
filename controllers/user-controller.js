@@ -79,15 +79,6 @@ exports.getPublicProfilePage = (req, res) => {
           "viewCount",
           "createdAt",
         ],
-      },
-      {
-        model: db.Follower,
-        as: 'Followers',
-        where: {
-          followedUserId: req.params.userId,
-          UserUserId: req.user.userId
-        },
-        attributes: [ "followedUserId", "UserUserId" ]
       }
     ],
   })
@@ -96,6 +87,19 @@ exports.getPublicProfilePage = (req, res) => {
         const hbsObject = dbUser.toJSON();
         hbsObject.title = "@" + hbsObject.username;
         hbsObject.isOwner = false;
+        hbsObject.following = false;
+
+        db.Follower.findOne({
+          where: {
+            followedUserUsername: req.params.username,
+            UserUserId: req.user.userId,
+          },
+        }).then((dbFollower) => {
+          console.log(dbFollower.dataValues);
+          if (dbFollower !== null) {
+            hbsObject.following = true;
+          }
+        });
         res.render("user/profile", hbsObject);
       }
     })
@@ -111,19 +115,19 @@ exports.follow = (req, res) => {
         if (dbUser !== null) {
           db.Follower.findOne({
             where: {
-              followedUserId: req.params.userId,
+              followedUserUsername: req.params.username,
               UserUserId: req.user.userId,
             },
           }).then((dbFollower) => {
             if (dbFollower === null) {
               db.Follower.create({
-                followedUserId: req.params.userId,
+                followedUserUsername: req.params.username,
                 UserUserId: req.user.userId,
               })
                 .then((dbFollower) => {
                   db.User.increment(
                     { followerCount: 1 },
-                    { where: { userId: req.params.userId } }
+                    { where: { username: req.params.username } }
                   );
                   res.redirect("/profile");
                 })

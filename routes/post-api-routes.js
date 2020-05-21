@@ -256,7 +256,7 @@ module.exports = (app) => {
 
   app.post('/api/comment/:postId', (req,res)=>{
     if(!req.user){
-      return res.json({ Error: "Please sign in to post a comment"});
+      return res.json({ response: "Please sign in to post a comment"});
     } else {
           db.Post.findByPk(req.params.postId).then((dbPost)=>{
       if (dbPost !== null && dbPost.dataValues.published === true){
@@ -264,7 +264,9 @@ module.exports = (app) => {
           res.json(dbComment);
         })
       }
-    })
+    }).catch((err)=>{
+      res.json(err);
+    });
     }
 
   });
