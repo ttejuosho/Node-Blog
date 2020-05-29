@@ -4,7 +4,7 @@
 
   <div class="col-md-7">
     <h3 class="display-4">{{name}}</h3>
-    <h6>{{#if loggedinUser}} @{{loggedinUser}} {{else}} @{{username}} {{/if}}</h6>
+    <h6>{{#if isOwner}} @{{loggedinUser}} {{else}} @{{username}} {{/if}}</h6>
     <p class="lead">{{tagline}}</p>
     <p>{{about}}</p>
     <h6>Member Since: {{#formatDate memberSince}} {{/formatDate}}</h6>
@@ -18,18 +18,27 @@
       <span class="mr-2"> <a class="text-dark" href="mailto:{{emailAddress}}"><i
             class="fas fa-envelope fa-2x"></i></a></span>
     </p>
+    {{#unless following}}
+    <input type="button" class="btn btn-secondary followButton mt-2" onclick="followUser(`{{username}}`)"
+      value="Follow" />
+    {{else}}
+    <input type="button" class="btn btn-outline-secondary followButton mt-2" value="Following" />
+    {{/unless}}
   </div>
 
 </div>
 <hr class="bloget-divider">
 
 <ul class="nav nav-tabs mb-1" role="tablist">
+  {{#if isOwner}}
   <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark active" id="posts-tab" data-toggle="tab"
       href="#posts" aria-controls="posts" aria-selected="true">Posts</a></li>
-      {{#ifEquals isOwner true}}
   <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark" id="drafts-tab" data-toggle="tab"
       href="#drafts" aria-controls="drafts" aria-selected="false">Drafts</a></li>
-      {{/ifEquals}}
+  {{else}}
+  <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark active" id="posts-tab" data-toggle="tab"
+      href="#posts" aria-controls="posts" aria-selected="true">Posts</a></li>
+  {{/if}}
 </ul>
 
 
@@ -71,7 +80,7 @@
     {{/each}}
   </div>
 
-  {{#unless isOwner}}
+  {{#if isOwner}}
   <div id="drafts" class="tab-pane fade" role="tabpanel" aria-labelledby="drafts-tab">
     {{#unless Posts}} <p> Nothing in the works yet. </p>
     <p><a href="/newPost">Click here to start writing</a></p>{{/unless}}
@@ -105,7 +114,7 @@
     {{/if}}
     {{/each}}
   </div>
-  {{/unless}}
+  {{/if}}
 </div>
 
 <div class="modal fade" id="confirmDeletePostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
@@ -191,4 +200,12 @@
     $('#unpublishPostBtn').attr('href', '/post/unpublish/' + postId)
   }
 
+  function followUser(username) {
+    fetch(`/api/follow/${username}`).then(response => response.json())
+      .then((data) => {
+        $('.followButton').attr('onclick', '');
+        $('.followButton').val(data.response);
+        $('.followButton').removeClass('btn-secondary').addClass('btn-outline-secondary');
+      })
+  }
 </script>
