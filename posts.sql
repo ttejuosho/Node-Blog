@@ -17,7 +17,8 @@ LIMIT 0, 1000
 
 -- Date: 2020-05-18 19:02
 */
-INSERT INTO nodeblog.Users (`userId`,`name`,`shortName`,`username`,`tagline`,`about`,`emailAddress`,`password`,`resetPasswordToken`,`resetPasswordExpires`,`phoneNumber`,`active`,`profileImage`,`twitter`,`facebook`,`linkedIn`,`github`,`followerCount`,`createdAt`,`updatedAt`) VALUES ('d9543daf-a48e-414e-8be3-01541258a1f3','Taiwo Tejuosho','Taiwo','ttejuosho','Founder - Bloget.com | Programmer & Tech savvy music enthusiast','In the beginning, there was code and the code was clean and then code became life','theycallmeflowz@yahoo.com','$2a$08$R.RFU5s/IB3cp8rQBqX7QuYse135XhVw.wNC9DCrikDuVcJhzI2rm',NULL,NULL,3126476896,1,'https://bloget.s3.amazonaws.com/1589854268005.png','theycallmeflowz','theycallmeflowz','ttejuosho','ttejuosho',1,'2020-05-19 02:08:33','2020-05-19 20:12:09');
+
+INSERT INTO nodeblog.Users (`userId`,`name`,`shortName`,`username`,`tagline`,`about`,`emailAddress`,`password`,`resetPasswordToken`,`resetPasswordExpires`,`phoneNumber`,`active`,`profileImage`,`twitter`,`facebook`,`linkedIn`,`github`,`followerCount`,`memberSince`,`createdAt`,`updatedAt`) VALUES ('d9543daf-a48e-414e-8be3-01541258a1f3','Taiwo Tejuosho','Taiwo','ttejuosho','Founder - Bloget.com | Programmer & Tech savvy music enthusiast','In the beginning, there was code and the code was clean and then code became life','theycallmeflowz@yahoo.com','$2a$08$R.RFU5s/IB3cp8rQBqX7QuYse135XhVw.wNC9DCrikDuVcJhzI2rm',NULL,NULL,3126476896,1,'https://bloget.s3.amazonaws.com/1589854268005.png','theycallmeflowz','theycallmeflowz','ttejuosho','ttejuosho',1,'2020-05-17 00:00:00','2020-05-19 02:08:33','2020-05-19 20:12:09');
 
 
 /*

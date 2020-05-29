@@ -217,7 +217,7 @@ body {
 }
 
 .profileImage{
-  height: 300px;
+  max-height: 350px;
 }
 
 .select2-selection{
