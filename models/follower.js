@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    followedUserUsernam: {
+    followedUserUsername: {
       type: DataTypes.STRING,
       allowNull: false,
     }

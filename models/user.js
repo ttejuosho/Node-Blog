@@ -74,6 +74,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       defaultValue: 0
     },
+    memberSince: {
+      type: DataTypes.DATE,
+      defaultValue: Date.now(),
+    },
   });
   // {
   //   defaultScope: {
