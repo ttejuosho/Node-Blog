@@ -21,7 +21,7 @@ module.exports = function(app) {
         check('username').not().isEmpty().escape().withMessage('Please enter a unique username'),
     ], authController.signup);
 
-    app.post('/finish', authController.finish);
+    app.post('/complete', authController.complete);
     
 // this is the route that prints out the user information from the user table
     app.get('/sessionUserId', authController.sessionUserId);

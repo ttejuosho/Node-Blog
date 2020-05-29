@@ -108,7 +108,7 @@ exports.signup = (req, res, next) => {
                 });
               })(req, res, next);
             } else {
-              res.render("auth/signin", { error: "Email already exists" });
+              res.render("auth/auth", { error: "Email already exists" });
             }
           })
           .catch((err) => {
@@ -144,7 +144,7 @@ exports.signup = (req, res, next) => {
   }
 };
 
-exports.finish = (req, res) => {
+exports.complete = (req, res) => {
   const singleUpload = upload.single("profileImage");
   singleUpload(req, res, (err) => {
     if (err) {
@@ -209,8 +209,9 @@ exports.signin = (req, res, next) => {
       const msg = {
         error: "Your Username or Password was incorrect",
         layout: "partials/prelogin",
+        signin: true,
       };
-      return res.render("auth/signin", msg);
+      return res.render("auth/auth", msg);
     }
 
     req.login(user, (loginErr) => {
@@ -218,8 +219,9 @@ exports.signin = (req, res, next) => {
         const msg = {
           error: "Authentication Failed",
           layout: "partials/prelogin",
+          signin: true,
         };
-        return res.render("auth/signin", msg);
+        return res.render("auth/auth", msg);
       }
 
       req.session.globalUser = {};

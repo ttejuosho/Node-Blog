@@ -3,7 +3,7 @@
 // load bcrypt
 const bCrypt = require('bcrypt-nodejs');
 const db = require('../../models');
-const sendEmail = require('../email/email');
+const sendEmail = require('../email/email.js');
 
 module.exports = function(passport, user) {
   const User = user;
@@ -53,7 +53,7 @@ module.exports = function(passport, user) {
           name: req.body.name,
           shortName: req.body.shortName,
           username: req.body.username,
-          phoneNumber: req.body.phoneNumber
+          phoneNumber: req.body.phoneNumber,
         };
 
         User.create(data).then(function(newUser, created) {
