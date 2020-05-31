@@ -18,6 +18,8 @@ LIMIT 0, 1000
 -- Date: 2020-05-18 19:02
 */
 
+INSERT INTO nodeblog.Users (`userId`,`name`,`shortName`,`username`,`tagline`,`about`,`emailAddress`,`password`,`resetPasswordToken`,`resetPasswordExpires`,`phoneNumber`,`active`,`profileImage`,`twitter`,`facebook`,`linkedIn`,`github`,`followerCount`,`memberSince`,`createdAt`,`updatedAt`) VALUES ('1091f076-abca-47a3-a43e-0b67f2361fc5','Mobolaji Ade','Mobolaji','mmadey','Writers Block','In the zone','ttejuosho@outlook.com','$2a$08$wzO/VUDj5Sz/7qppzxrX0.4CmnZhO3s.wgMB.4hJ16Hy/TS9Dde1y',NULL,NULL,2139009987,1,'https://bloget.s3.amazonaws.com/1590383464261.jpg','aliyah','aliyah','aliyahmob','aliyah',0,'2020-05-25 05:10:17','2020-05-25 05:10:17','2020-05-25 05:11:04');
+INSERT INTO nodeblog.Users (`userId`,`name`,`shortName`,`username`,`tagline`,`about`,`emailAddress`,`password`,`resetPasswordToken`,`resetPasswordExpires`,`phoneNumber`,`active`,`profileImage`,`twitter`,`facebook`,`linkedIn`,`github`,`followerCount`,`memberSince`,`createdAt`,`updatedAt`) VALUES ('cf56bc0e-12bf-4b03-8f1a-1d89ae7ed4e3','Aliyu Mohammed','Aliyu','amoh','Music Producer @ Island Def Jam','In the beginning, there was code and the code was clean and then code became life','aliyumohammed@yahoo.com','$2a$08$R.RFU5s/IB3cp8rQBqX7QuYse135XhVw.wNC9DCrikDuVcJhzI2rm',NULL,NULL,5062253367,1,'https://bloget.s3.amazonaws.com/1589854268005.png','Aliyu','Aliyu','Aliyu','AliyuBaba',1,'2020-05-17 00:00:00','2020-05-19 02:08:33','2020-05-19 20:12:09');
 INSERT INTO nodeblog.Users (`userId`,`name`,`shortName`,`username`,`tagline`,`about`,`emailAddress`,`password`,`resetPasswordToken`,`resetPasswordExpires`,`phoneNumber`,`active`,`profileImage`,`twitter`,`facebook`,`linkedIn`,`github`,`followerCount`,`memberSince`,`createdAt`,`updatedAt`) VALUES ('d9543daf-a48e-414e-8be3-01541258a1f3','Taiwo Tejuosho','Taiwo','ttejuosho','Founder - Bloget.com | Programmer & Tech savvy music enthusiast','In the beginning, there was code and the code was clean and then code became life','theycallmeflowz@yahoo.com','$2a$08$R.RFU5s/IB3cp8rQBqX7QuYse135XhVw.wNC9DCrikDuVcJhzI2rm',NULL,NULL,3126476896,1,'https://bloget.s3.amazonaws.com/1589854268005.png','theycallmeflowz','theycallmeflowz','ttejuosho','ttejuosho',1,'2020-05-17 00:00:00','2020-05-19 02:08:33','2020-05-19 20:12:09');
 
 
@@ -28,3 +30,12 @@ LIMIT 0, 1000
 -- Date: 2020-05-18 19:02
 */
 INSERT INTO nodeblog.Comments (`commentId`,`commentBody`,`likesCount`,`dislikesCount`,`createdAt`,`updatedAt`,`UserUserId`,`PostPostId`) VALUES ('207d48f8-6b98-4745-957b-a4a3be7bcb6d','i like this post',0,0,'2020-05-20 06:40:16','2020-05-20 06:40:16','d9543daf-a48e-414e-8be3-01541258a1f3','965730f6-7989-45cb-863e-5e5efbc9d579');
+INSERT INTO nodeblog.Comments (`commentId`,`commentBody`,`likesCount`,`dislikesCount`,`createdAt`,`updatedAt`,`UserUserId`,`PostPostId`) VALUES ('8d4825da-67d1-4df9-ab40-fa4d2c882aa3','I love this post, its thoughful.',0,0,'2020-05-30 14:13:30','2020-05-30 14:13:30','d9543daf-a48e-414e-8be3-01541258a1f3','0b0b2c60-1fe5-494c-994d-ddbe6d338cbe');
+
+/*
+-- Query: SELECT * FROM nodeblog.Followers
+LIMIT 0, 1000
+
+-- Date: 2020-05-31 07:12
+*/
+INSERT INTO nodeblog.Followers (`followerId`,`followedUserUsername`,`createdAt`,`updatedAt`,`UserUserId`) VALUES ('ac065264-9257-4800-bd44-8e551d4e5a14','amoh','2020-05-29 04:11:27','2020-05-29 04:11:27','d9543daf-a48e-414e-8be3-01541258a1f3');
