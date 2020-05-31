@@ -283,3 +283,8 @@ body {
   .pointer{
     cursor: pointer;
   }
+
+  .profileThumbnail{
+    width: 65px;
+    height: 65px;
+  }

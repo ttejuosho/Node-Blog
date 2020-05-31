@@ -12,6 +12,7 @@ const passport = require("passport");
 const session = require("express-session");
 const morgan = require("morgan");
 const moment = require("moment");
+
 require("dotenv").config();
 
 // cors setup
@@ -96,12 +97,9 @@ app.use((req, res, next) => {
       res.locals.about = req.user.about;
       res.locals.tagline = req.user.tagline;
     }
-
   }
   next();
 });
-
-
 
 require("./routes/user-api-routes")(app);
 require("./routes/post-api-routes")(app);
@@ -110,8 +108,6 @@ require("./routes/auth-api-routes")(app);
 require("./routes/user-routes")(app);
 require("./routes/post-routes")(app);
 require("./routes/auth-routes")(app);
-
-
 
 // load passport strategies
 require("./services/passport/passport.js")(passport, db.User);
