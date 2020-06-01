@@ -20,6 +20,12 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Comment.associate = (models) => {
+    Comment.belongsTo(models.User, {
+      onDelete: "cascade",
+    });
+    Comment.belongsTo(models.Post, {
+      onDelete: "cascade",
+    });
     Comment.hasMany(models.Reaction, {
       onDelete: "cascade",
     });

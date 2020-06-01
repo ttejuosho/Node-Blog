@@ -76,7 +76,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     memberSince: {
       type: DataTypes.DATE,
-      defaultValue: Date.now(),
+      defaultValue: DataTypes.NOW,
     },
   });
   // {
@@ -97,6 +97,9 @@ module.exports = (sequelize, DataTypes) => {
     });
     User.hasMany(models.Reaction, {
       onDelete: 'cascade',
+    });
+    User.hasMany(models.Subscriber, {
+      onDelete: "cascade",
     });
   };
 
