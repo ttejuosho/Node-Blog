@@ -1,37 +1,5 @@
 const db = require("../models");
 
-exports.getProfilePagee = (req, res) => {
-  db.User.findByPk(req.user.userId, {
-    include: [
-      {
-        model: db.Post,
-        as: "Posts",
-        attributes: [
-          "postId",
-          "postTitle",
-          "postBody",
-          "postImage",
-          "postDescription",
-          "published",
-          "isDraft",
-          "viewCount",
-          "createdAt",
-        ],
-      },
-    ],
-  })
-    .then((dbUser) => {
-      if (dbUser !== null) {
-        const hbsObject = dbUser.toJSON();
-        hbsObject.title = "@" + hbsObject.username;
-        res.render("user/profile", hbsObject);
-      }
-    })
-    .catch((err) => {
-      res.render("error", { error: err });
-    });
-};
-
 exports.getProfilePage = (req, res) => {
   db.Post.findAll({
     where: {
@@ -60,14 +28,13 @@ exports.getPublicProfilePage = (req, res) => {
     where: {
       username: req.params.username,
     },
+    attributes: {
+      exclude: ["password"],
+    },
     include: [
       {
         model: db.Post,
         as: "Posts",
-        where: {
-          deleted: false,
-          published: true,
-        },
         attributes: [
           "postId",
           "postTitle",
@@ -79,29 +46,38 @@ exports.getPublicProfilePage = (req, res) => {
           "viewCount",
           "createdAt",
         ],
-      }
+      },
     ],
   })
     .then((dbUser) => {
       if (dbUser !== null) {
-        const hbsObject = dbUser.toJSON();
+        var hbsObject = dbUser.toJSON();
         hbsObject.title = "@" + hbsObject.username;
         hbsObject.isOwner = false;
         hbsObject.following = false;
+      } else {
+        return res.render("error", { error: "User not found" });
+      }
 
+      // Check if whos following who
+      if (req.user) {
         db.Follower.findOne({
           where: {
             followedUserUsername: req.params.username,
             UserUserId: req.user.userId,
           },
         }).then((dbFollower) => {
-          console.log(dbFollower.dataValues);
           if (dbFollower !== null) {
             hbsObject.following = true;
           }
+          return res.render("user/profile", hbsObject);
         });
-        res.render("user/profile", hbsObject);
+      } else {
+        return res.render("user/profile", hbsObject);
       }
+      
+      //console.log(hbsObject);
+
     })
     .catch((err) => {
       res.render("error", { error: err });
