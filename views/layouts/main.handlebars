@@ -58,6 +58,7 @@
           </li>
         </ul>
       </div>
+      <input type="hidden" id="isAuthenticated" value=true />
     </header>
 
     {{else}}
@@ -96,6 +97,7 @@
         </ul>
       </div>
     </nav>
+    <input type="hidden" id="isAuthenticated" value=false />
 
     {{/if}}
   </div>
@@ -114,7 +116,14 @@
 </footer>
 
   <!-- Bootstrap core JavaScript -->
-
+<script type="text/javascript">
+function isAuthenticated(){
+  if($('#isAuthenticated').val() === "true"){
+    return true;
+  }
+  return false;
+}
+</script>
 </body>
 
 </html>
