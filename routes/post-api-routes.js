@@ -1,4 +1,6 @@
 const db = require("../models");
+const sequelize = require("sequelize");
+const moment = require("moment");
 
 module.exports = (app) => {
   // Get all Posts by a User
@@ -69,14 +71,9 @@ module.exports = (app) => {
             {
               model: db.User,
               as: "User",
-              attributes: [
-                "userId",
-                "username",
-                "name",
-                "shortName",
-              ]
-            }
-          ]
+              attributes: ["userId", "username", "name", "shortName"],
+            },
+          ],
         },
       ],
     }).then((dbPost) => {
@@ -113,7 +110,7 @@ module.exports = (app) => {
   app.post("/api/newReaction/:postId", (req, res) => {
     db.Post.findByPk(req.params.postId).then((dbPost) => {
       if (dbPost !== null) {
-        db.Reaction.create({ reactionBody: req.body.reactionBody })
+        db.Reaction.create({ reaction: req.body.reactionBody })
           .then((dbReaction) => {
             db.Post.increment(
               { reactionCount: 1 },
@@ -127,9 +124,7 @@ module.exports = (app) => {
                   as: "Reaction",
                   attributes: [
                     "reactionId",
-                    "reactionBody",
-                    "likesCount",
-                    "dislikesCount",
+                    "reaction",
                   ],
                 },
               ],
@@ -163,111 +158,234 @@ module.exports = (app) => {
       });
   });
 
-  app.get("/api/react/:reaction/:postId", (req, res) => {
+  // post-like post-dislike // comment-like comment-dislike
+  app.get("/api/react/:reactTo/:reaction/:reactToId", (req, res) => {
     if (
-      req.params.reaction.toLowerCase() === "like" ||
-      req.params.reaction.toLowerCase() === "dislike"
+      (req.params.reaction.toLowerCase() === "like" ||
+        req.params.reaction.toLowerCase() === "dislike") &&
+      (req.params.reactTo.toLowerCase() === "post" ||
+        req.params.reactTo.toLowerCase() === "comment")
     ) {
-      db.Post.findByPk(req.params.postId)
-        .then((dbPost) => {
-          if (dbPost !== null) {
-            var likesCount = dbPost.dataValues.likesCount;
-            var dislikesCount = dbPost.dataValues.dislikesCount;
+      // POST SECTION
+      if (req.params.reactTo.toLowerCase() === "post") {
+        db.Post.findByPk(req.params.reactToId)
+          .then((dbPost) => {
+            if (dbPost !== null) {
+              var likesCount = dbPost.dataValues.likesCount;
+              var dislikesCount = dbPost.dataValues.dislikesCount;
 
-            db.Reaction.findOne({
-              where: {
-                userId: req.user.userId,
-                postId: req.params.postId,
-              },
-            }).then((dbReaction) => {
+              db.Reaction.findOne({
+                where: {
+                  UserUserId: req.user.userId,
+                  PostPostId: req.params.reactToId,
+                },
+              }).then((dbReaction) => {
+                if (
+                  dbReaction === null ||
+                  dbReaction.dataValues.reaction !== req.params.reaction
+                ) {
+                  var updateObject = { dislikesCount: 1 };
 
-              if (
-                dbReaction === null ||
-                dbReaction.dataValues.reaction !== req.params.reaction
-              ) {
-                if (req.params.reaction === "like") {
-                  var changeThis = { likesCount: 1 };
+                  if (req.params.reaction === "like") {
+                    updateObject = { likesCount: 1 };
+                  }
+
+                  db.Post.increment(updateObject, {
+                    where: { postId: req.params.reactToId },
+                  });
+
+                  if (dbReaction.dataValues.reaction) {
+                    db.Reaction.update(
+                      { reaction: req.params.reaction },
+                      {
+                        where: {
+                          UserUserId: req.user.userId,
+                          PostPostId: req.params.reactToId,
+                        },
+                      }
+                    ).then((count) => {
+                      if (req.params.reaction === "like") {
+                        db.Post.decrement(["dislikesCount"], {
+                          where: { postId: req.params.reactToId },
+                        });
+                        res.json({
+                          likesCount: likesCount + 1,
+                          dislikesCount: dislikesCount - 1,
+                        });
+                      } else {
+                        db.Post.decrement(["likesCount"], {
+                          where: { postId: req.params.reactToId },
+                        });
+                        res.json({
+                          likesCount: likesCount - 1,
+                          dislikesCount: dislikesCount + 1,
+                        });
+                      }
+                    });
+                  }
+
+                  if (dbReaction === null) {
+                    db.Reaction.create({
+                      UserUserId: req.user.userId,
+                      PostPostId: req.params.reactToId,
+                      reaction: req.params.reaction,
+                    }).then((count) => {
+                      if (req.params.reaction === "like") {
+                        res.json({ count: likesCount + 1 });
+                      } else {
+                        res.json({ count: dislikesCount + 1 });
+                      }
+                    });
+                  }
                 } else {
-                  changeThis = { dislikesCount: 1 };
+                  res.json({ response: "Action already taken on post" });
                 }
+              });
+            } else {
+              res.json({ error: "Post not found" });
+            }
+          })
+          .catch((err) => {
+            res.json(err);
+          });
+      }
+      // END POST SECTION
 
-                db.Post.increment(changeThis, {
-                  where: { postId: req.params.postId },
-                });
+      // COMMENT SECTION
+      if (req.params.reactTo.toLowerCase() === "comment") {
+        db.Comment.findByPk(req.params.reactToId)
+          .then((dbComment) => {
+            if (dbComment !== null) {
+              var likesCount = dbComment.dataValues.likesCount;
+              var dislikesCount = dbComment.dataValues.dislikesCount;
 
-                if (dbReaction.dataValues.reaction) {
-                  db.Reaction.update(
-                    { reaction: req.params.reaction },
-                    {
-                      where: {
-                        userId: req.user.userId,
-                        postId: req.params.postId,
-                      },
-                    }
-                  ).then((count) => {
-                    if (req.params.reaction === "like") {
-                      db.Post.decrement(["dislikesCount"], {
-                        where: { postId: req.params.postId },
-                      });
-                      res.json({
-                        likesCount: likesCount + 1,
-                        dislikesCount: dislikesCount - 1,
-                      });
-                    } else {
-                      db.Post.decrement(["likesCount"], {
-                        where: { postId: req.params.postId },
-                      });
-                      res.json({
-                        likesCount: likesCount - 1,
-                        dislikesCount: dislikesCount + 1,
-                      });
-                    }
+              db.Reaction.findOne({
+                where: {
+                  UserUserId: req.user.userId,
+                  CommentCommentId: req.params.reactToId,
+                },
+              }).then((dbReaction) => {
+                if (
+                  dbReaction === null ||
+                  dbReaction.dataValues.reaction !== req.params.reaction
+                ) {
+                  var updateObject = { dislikesCount: 1 };
+
+                  if (req.params.reaction === "like") {
+                    updateObject = { likesCount: 1 };
+                  }
+
+                  db.Comment.increment(updateObject, {
+                    where: { commentId: req.params.reactToId },
                   });
-                }
 
-                if (dbReaction === null) {
-                  db.Reaction.create({
-                    userId: req.user.userId,
-                    postId: req.params.postId,
-                    reaction: req.params.reaction,
-                  }).then((count) => {
-                    if (req.params.reaction === "like") {
-                      res.json({ count: likesCount + 1 });
-                    } else {
-                      res.json({ count: dislikesCount + 1 });
-                    }
-                  });
+                  if (dbReaction !== null) {
+                    db.Reaction.update(
+                      { reaction: req.params.reaction },
+                      {
+                        where: {
+                          UserUserId: req.user.userId,
+                          CommentCommentId: req.params.reactToId,
+                        },
+                      }
+                    ).then((count) => {
+                      if (req.params.reaction === "like") {
+                        db.Comment.decrement(["dislikesCount"], {
+                          where: { commentId: req.params.reactToId },
+                        });
+                        res.json({
+                          likesCount: likesCount + 1,
+                          dislikesCount: dislikesCount - 1,
+                        });
+                      } else {
+                        db.Comment.decrement(["likesCount"], {
+                          where: { commentId: req.params.reactToId },
+                        });
+                        res.json({
+                          likesCount: likesCount - 1,
+                          dislikesCount: dislikesCount + 1,
+                        });
+                      }
+                    });
+                  }
+
+                  if (dbReaction === null) {
+                    db.Reaction.create({
+                      UserUserId: req.user.userId,
+                      CommentCommentId: req.params.reactToId,
+                      reaction: req.params.reaction,
+                    }).then((count) => {
+                      if (req.params.reaction === "like") {
+                        res.json({ count: likesCount + 1 });
+                      } else {
+                        res.json({ count: dislikesCount + 1 });
+                      }
+                    });
+                  }
+                } else {
+                  res.json({ response: "Action already taken on comment" });
                 }
-              } else {
-                res.json({ response: "Action already taken on post" });
-              }
-            });
-          } else {
-            res.json({ error: "Post not found" });
-          }
-        })
-        .catch((err) => {
-          res.json(err);
-        });
+              });
+            } else {
+              res.json({ error: "Comment not found" });
+            }
+          })
+          .catch((err) => {
+            res.json(err);
+          });
+      }
+      // END COMMENT SECTION
     } else {
       res.json({ error: "Wrong parameter passed" });
     }
   });
 
-  app.post('/api/comment/:postId', (req,res)=>{
-    if(!req.user){
-      return res.json({ response: "Please sign in to post a comment"});
-    } else {
-          db.Post.findByPk(req.params.postId).then((dbPost)=>{
-      if (dbPost !== null && dbPost.dataValues.published === true){
-        db.Comment.create({ commentBody: req.body.commentBody, PostPostId: req.params.postId, UserUserId: req.user.userId }).then((dbComment)=>{
-          res.json(dbComment);
-        })
+  app.post("/api/post/comment/:postId", (req, res) => {
+    try {
+      if (!req.user) {
+        return res.json({ response: "Please sign in to post a comment" });
+      } else {
+        db.Post.findByPk(req.params.postId).then((dbPost) => {
+          if (dbPost !== null && dbPost.dataValues.published === true) {
+            db.Comment.create({
+              commentBody: req.body.commentBody,
+              PostPostId: req.params.postId,
+              UserUserId: req.user.userId,
+            }).then((dbComment) => {
+              db.Comment.findByPk(dbComment.dataValues.commentId, {
+                include: [{
+                  model: db.User,
+                  as: "User",
+                  attributes: [ "profileImage", "userId", "name" ]
+                }]
+              })
+              .then((data)=>{
+                res.json(data);
+              })
+            });
+          }
+        });
       }
-    }).catch((err)=>{
+    } catch (err) {
       res.json(err);
-    });
     }
+  });
 
+  app.get("/api/post/byTime/:time", (req,res)=>{
+    var startDate = new Date(req.params.time);
+    //var endDate = new Date(req.params.time2);
+    console.log(startDate);
+    //console.log(endDate);
+
+    db.Post.findAll({
+      where: {
+          createdAt: {
+            $gt: startDate
+          }
+      },
+      orderBy: [['createdAt', 'DESC']],
+    }).then((dbPosts)=>{
+      res.json(dbPosts);
+    })
   });
 };

@@ -23,4 +23,5 @@ module.exports = function(app) {
     app.get('/post/publish/:postId', postController.publishPost);
     app.get('/post/unpublish/:postId', postController.unpublishPost);
     app.get('/post/reactions/:postId', postController.getReactions);
+    app.post('/post/comment/:postId', Security.isLoggedIn, postController.commentOnPost);
 }

@@ -48,6 +48,7 @@ exports.createNewPost = (req, res) => {
 };
 
 exports.getPost = (req, res) => {
+  var hbsObject = {};
   db.Post.findByPk(req.params.postId, {
     include: [
       {
@@ -68,7 +69,7 @@ exports.getPost = (req, res) => {
       },
       {
         model: db.Comment,
-        limit: 10,
+        limit: 5,
         as: "Comments",
         attributes: [
           "commentId",
@@ -83,18 +84,27 @@ exports.getPost = (req, res) => {
           {
             model: db.User,
             as: "User",
-            attributes: ["userId","username", "name", "shortName"],
+            attributes: [
+              "userId",
+              "username",
+              "name",
+              "shortName",
+              "profileImage",
+            ],
           },
         ],
+        order: [["createdAt", "DESC"]],
       },
     ],
   })
     .then((dbPost) => {
       if (dbPost !== null) {
-        if(dbPost.dataValues.deleted === true){
-          return res.render("post/viewPost", { message: "This post has been removed." });
+        if (dbPost.dataValues.deleted === true) {
+          return res.render("post/viewPost", {
+            message: "This post has been removed.",
+          });
         }
-        var hbsObject = {
+        hbsObject = {
           postId: dbPost.dataValues.postId,
           postTitle: dbPost.dataValues.postTitle,
           postBody: dbPost.dataValues.postBody,
@@ -106,7 +116,7 @@ exports.getPost = (req, res) => {
           viewCount: dbPost.dataValues.viewCount,
           likesCount: dbPost.dataValues.likesCount,
           dislikesCount: dbPost.dataValues.dislikesCount,
-          userId: dbPost.dataValues.UserUserId,
+          postAuthorUserId: dbPost.dataValues.UserUserId,
           createdAt: dbPost.dataValues.createdAt,
           postAuthorUsername: dbPost.User.dataValues.username,
           postAuthorName: dbPost.User.dataValues.name,
@@ -116,13 +126,18 @@ exports.getPost = (req, res) => {
           postAuthorFacebook: dbPost.User.dataValues.facebook,
           postAuthorTwitter: dbPost.User.dataValues.twitter,
           postAuthorGithub: dbPost.User.dataValues.github,
+          following: false,
           Comments: [],
         };
 
         for (var i = 0; i < dbPost.dataValues.Comments.length; i++) {
           hbsObject.Comments.push(dbPost.dataValues.Comments[i].dataValues);
-          hbsObject.Comments[i].commentBy = dbPost.dataValues.Comments[i].User.dataValues.name;
-          hbsObject.Comments[i].commentByUserId = dbPost.dataValues.Comments[i].User.dataValues.userId;
+          hbsObject.Comments[i].commentBy =
+            dbPost.dataValues.Comments[i].User.dataValues.name;
+          hbsObject.Comments[i].commentByUserId =
+            dbPost.dataValues.Comments[i].User.dataValues.userId;
+          hbsObject.Comments[i].commentByUserProfileImage =
+            dbPost.dataValues.Comments[i].User.dataValues.profileImage;
         }
 
         //When not signed in or another user is viewing post, ViewCount increment
@@ -136,7 +151,22 @@ exports.getPost = (req, res) => {
           );
         }
 
-        return res.render("post/viewPost", hbsObject);
+        if (req.user) {
+          db.Follower.findOne({
+            where: {
+              followedUserUsername: hbsObject.postAuthorUsername,
+              UserUserId: req.user.userId,
+            },
+          }).then((dbFollower) => {
+            if (dbFollower !== null) {
+              hbsObject.following = true;
+            }
+            //console.log(hbsObject);
+            return res.render("post/viewPost", hbsObject);
+          });
+        } else {
+          return res.render("post/viewPost", hbsObject);
+        }
       } else {
         return res.render("post/viewPost", { message: "Post not found" });
       }
@@ -146,14 +176,14 @@ exports.getPost = (req, res) => {
     });
 };
 
-exports.getEditPost = (req, res) => {
-  db.Post.findOne({
-    where: {
-      postId: req.params.postId,
-      UserUserId: res.locals.userId,
-    },
-  })
-    .then((dbPost) => {
+exports.getEditPost = async (req, res, next) => {
+  try {
+    db.Post.findOne({
+      where: {
+        postId: req.params.postId,
+        UserUserId: res.locals.userId,
+      },
+    }).then((dbPost) => {
       if (dbPost !== null) {
         var hbsObject = {
           postId: dbPost.dataValues.postId,
@@ -167,31 +197,31 @@ exports.getEditPost = (req, res) => {
           viewCount: dbPost.dataValues.viewCount,
           editMode: true,
         };
-        //console.log(hbsObject);
+
         return res.render("post/newPost", hbsObject);
       }
-    })
-    .catch((err) => {
-      res.render("error", { error: err });
     });
+  } catch (error) {
+    res.render("error", error);
+  }
 };
 
-exports.updatePost = (req, res) => {
-  const singleUpload = upload.single("postImage");
-  singleUpload(req, res, (err) => {
-    if (err) {
-      return res.status(422).send({
-        errors: [{ title: "Image Upload Error", detail: err.message }],
-      });
-    }
+exports.updatePost = async (req, res, next) => {
+  try {
+    const singleUpload = upload.single("postImage");
+    singleUpload(req, res, (err) => {
+      if (err) {
+        return res.status(422).send({
+          errors: [{ title: "Image Upload Error", detail: err.message }],
+        });
+      }
 
-    db.Post.findOne({
-      where: {
-        postId: req.params.postId,
-        UserUserId: res.locals.userId,
-      },
-    })
-      .then((dbPost) => {
+      db.Post.findOne({
+        where: {
+          postId: req.params.postId,
+          UserUserId: res.locals.userId,
+        },
+      }).then((dbPost) => {
         if (dbPost !== null) {
           const postData = {
             postTitle: req.body.postTitle,
@@ -205,8 +235,6 @@ exports.updatePost = (req, res) => {
             published: req.body.action === "Save Draft" ? false : true,
           };
 
-          //console.log(req.file);
-
           db.Post.update(postData, {
             where: {
               postId: req.params.postId,
@@ -219,11 +247,11 @@ exports.updatePost = (req, res) => {
               res.render("error", err);
             });
         }
-      })
-      .catch((err) => {
-        res.render("error", err);
       });
-  });
+    });
+  } catch (error) {
+    res.render("error", error);
+  }
 };
 
 exports.publishPost = (req, res) => {
@@ -319,7 +347,7 @@ exports.deletePost = (req, res) => {
 exports.newReaction = (req, res) => {
   db.Post.findByPk(req.params.postId).then((dbPost) => {
     if (dbPost !== null) {
-      db.Reaction.create({ reactionBody: req.body.reactionBody })
+      db.Reaction.create({ reaction: req.body.reactionBody })
         .then((dbReaction) => {
           db.Post.increment(
             { reactionCount: 1 },
@@ -333,9 +361,7 @@ exports.newReaction = (req, res) => {
                 as: "Reaction",
                 attributes: [
                   "reactionId",
-                  "reactionBody",
-                  "likesCount",
-                  "dislikesCount",
+                  "reaction",
                 ],
               },
             ],
@@ -379,4 +405,18 @@ exports.getReactions = (req, res) => {
     .catch((err) => {
       res.render("error", { error: err });
     });
+};
+
+exports.commentOnPost = (req, res) => {
+  db.Post.findByPk(req.params.postId).then((dbPost) => {
+    if (dbPost !== null && dbPost.dataValues.published === true) {
+      db.Comment.create({
+        commentBody: req.body.commentBody,
+        PostPostId: req.params.postId,
+        UserUserId: req.user.userId,
+      }).then((dbComment) => {
+        return res.redirect("/post/" + req.params.postId);
+      });
+    }
+  });
 };
