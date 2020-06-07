@@ -1,0 +1,28 @@
+<main role="main" class="container">
+    <div class="row pt-2">
+        <div class="col-md-12 blog-main">
+            <h3>Your Recently Viewed Posts</h3>
+            {{#each recentlyViewedPosts}}
+                {{#if published}}
+                    <div class="row mb-2">
+                    <div class="col-md-12">
+                        <div
+                        class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                        <div class="col p-4 d-flex flex-column position-static">
+                            <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
+                            <h3 class="mb-0"><a class="text-dark" href="/post/{{postId}}">{{postTitle}}</a></h3>
+                            <div class="mb-1 text-muted">Viewed {{#formatDate viewedOn}} {{/formatDate}}</div>
+                            <p class="card-text mb-auto">{{postDescription}}</p>
+                            <small class="form-text text-muted mb-2">This post has been viewed {{viewCount}} times</small>
+                        </div>
+                        <div class="col-auto d-none d-lg-block">
+                            <img src="{{postImage}}" style="height: 250px; width: 350px;" />
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                {{/if}}
+            {{/each}}
+        </div>
+    </div>
+</main>

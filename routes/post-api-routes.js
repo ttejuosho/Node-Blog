@@ -1,5 +1,10 @@
 const db = require("../models");
-const sequelize = require("sequelize");
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
+const operatorsAliases = {
+    $eq: Op.eq,
+    $or: Op.or,
+}
 const moment = require("moment");
 
 module.exports = (app) => {
@@ -371,21 +376,122 @@ module.exports = (app) => {
     }
   });
 
-  app.get("/api/post/byTime/:time", (req,res)=>{
-    var startDate = new Date(req.params.time);
-    //var endDate = new Date(req.params.time2);
-    console.log(startDate);
-    //console.log(endDate);
+  app.get("/api/post/byTime/:startDate/:endDate", (req,res)=>{
+    var startDate = new Date(req.params.startDate);
+    var endDate = new Date(req.params.endDate);
+
+    // startDate = new Date(startDate.getFullYear()
+    //                     ,startDate.getMonth()
+    //                     ,startDate.getDate()
+    //                     ,00,01,00);
+
+    // endDate = new Date(endDate.getFullYear()
+    //                   ,endDate.getMonth()
+    //                   ,endDate.getDate()
+    //                   ,23,59,59);
+
+    const ACCEPT_FORMAT = 'YYYY-MM-DD hh:mm:ss';
+    const start_date = req.params.startDate;
+    const end_date = req.params.endDate;
+    const start = moment.utc(start_date, ACCEPT_FORMAT);
+    const end = moment.utc(end_date, ACCEPT_FORMAT);
+    console.log(start);
+    console.log(end);
+
+    var local = moment(start).local().format('YYYY-MM-DD HH:mm:ss');
+
+    //console.log(startDate, endDate);
+    console.log(local);
 
     db.Post.findAll({
       where: {
-          createdAt: {
-            $gt: startDate
-          }
+        createdAt: {
+          [Op.between]: [start, end]
+      }
+      //   [Op.or]: [{
+      //     createdAt: {
+      //         [Op.between]: [startDate, endDate]
+      //     }
+      // }, {
+      //     createdAt: {
+      //         [Op.between]: [startDate, endDate]
+      //     }
+      // }]
       },
-      orderBy: [['createdAt', 'DESC']],
     }).then((dbPosts)=>{
       res.json(dbPosts);
-    })
+    }).catch((error) => {
+      console.log(error);
+    });
   });
+
+  app.get('/api/getsub', (req,res)=>{
+    db.Subscriber.findAll().then((dbSub)=>{
+      res.json(dbSub);
+    });
+  });
+
+  app.get("/api/postsbycategory/:category", (req,res)=>{
+    db.Post.findAll({
+      where: {
+        postCategory: req.params.category
+      }
+    }).then((dbPosts)=>{
+      res.json(dbPosts);
+    });
+  });
+
+  app.get("/api/post/recentlyViewed", (req,res)=>{
+    if(!req.isAuthenticated()){
+      return res.json("Please sign in.");
+    }
+    db.RecentlyViewed.findAll({
+      where: {
+        UserUserId: req.user.userId
+      },
+        include: [
+          {
+            model: db.Post,
+            as: "Post",
+            attributes: [
+              "postId",
+              "postTitle",
+              "postBody",
+              "postImage",
+              "postDescription",
+              "isDraft",
+              "published",
+              "viewCount",
+            ],
+          },
+        ],
+    }).then((dbPost)=>{
+      res.json(dbPost);
+    }).catch((err)=> {
+      res.json(err);
+    });
+  });
+
+  app.get('/api/post/comments/:postId', (req,res)=>{
+    db.Comment.findAll({
+      where: {
+        PostPostId: req.params.postId,
+      },
+      include: [
+        {
+          model: db.User,
+          as: "User",
+          attributes: ["userId", "username", "name", "shortName", "profileImage", "about", "facebook", "linkedin", "github","twitter"],
+        },
+        {
+          model: db.Post,
+          as: "Post",
+          attributes: ["postId", "postTitle"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    }).then((dbComment)=>{
+      res.json(dbComment);
+    })
+  })
 };

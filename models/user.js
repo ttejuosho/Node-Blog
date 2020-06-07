@@ -101,6 +101,9 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Subscriber, {
       onDelete: "cascade",
     });
+    User.hasMany(models.RecentlyViewed, {
+      onDelete: "cascade",
+    });
   };
 
   return User;

@@ -1,0 +1,97 @@
+<main role="main" class="container">
+  <div class="row pt-2">
+    <div class="col-md-8 blog-main">
+
+
+<h2 class="blog-post-title"><a class="text-dark" href="/post/{{postId}}">{{postTitle}}</a></h2>
+<h4>Comments</h4>
+<div id="commentSection" class="blog-post">
+
+    {{#unless Comments}}
+    <p>No user has commented on this post for now.</p>
+    {{/unless}}
+    {{#each Comments}}
+    <div class="card mb-2">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-2 pr-0">
+                    <img class="rounded-circle profileThumbnail" src="{{commentByProfileImage}}" />
+                </div>
+                <div class="col-10 pl-0 pt-2">
+                    <h4 class="mb-0"><a class="text-dark" href="/profile/{{commentByUserId}}">{{commentByName}}</a></h4>
+                    <h6 class="mb-0">{{#formatDate createdAt}} {{/formatDate}}</h6>
+                </div>
+            </div>
+            <div class="row mt-1">
+                <div class="col-12">
+                    <p class="mb-1">{{commentBody}}</p>
+                </div>
+            </div>
+            <p class="float-left mb-0">
+                <span id="commentThumbsUp" class="pointer" data-toggle="tooltip" data-placement="bottom" title="vote up"
+                    onclick="reactTo(`comment`,`like`, `{{commentId}}`)">
+                    <i class="far fa-thumbs-up mr-2"></i><small
+                        class="commentLikesCount text-success mr-2">{{likesCount}}</small>
+                </span>
+                <span id="commentThumbsDown" class="pointer" data-toggle="tooltip" data-placement="bottom"
+                    title="vote down" onclick="reactTo(`comment`,`dislike`, `{{commentId}}`)">
+                    <i class="far fa-thumbs-down mr-2"></i><small
+                        class="commentDislikesCount text-danger mr-2">{{dislikesCount}}</small>
+                </span>
+            </p>
+        </div>
+    </div>
+    {{/each}}
+</div>
+</div>
+   
+</div>
+</main>
+
+<script type="text/javascript">
+function reactTo(reactTo, reaction, reactToId) {
+    var reVal = reaction;
+    fetch(`/api/react/${reactTo}/${reaction}/${reactToId}`).then(response => response.json())
+      .then((data) => {
+        if (!data.response) {
+
+          if (reactTo === 'post') {
+            $('.likesCount').text(data.likesCount);
+            $('.dislikesCount').text(data.dislikesCount);
+            $('#thumbsUp').removeClass('text-danger');
+            $('#thumbsDown').removeClass('text-danger');
+          }
+
+          if (reactTo === 'comment') {
+            $('.commentLikesCount').text(data.likesCount);
+            $('.commentDislikesCount').text(data.dislikesCount);
+            $('#commentThumbsUp').removeClass('text-danger');
+            $('#commentThumbsDown').removeClass('text-danger');
+          }
+
+        } else {
+
+          if (reactTo === 'post' && reaction === 'like') {
+            $('#thumbsUp').addClass('text-danger');
+            $('#thumbsDown').removeClass('text-danger');
+          }
+
+          if (reactTo === 'post' && reaction === 'dislike') {
+            $('#thumbsUp').removeClass('text-danger');
+            $('#thumbsDown').addClass('text-danger');
+          }
+
+          if (reactTo === 'comment' && reaction === 'like') {
+            $('#commentThumbsUp').addClass('text-danger');
+            $('#commentThumbsDown').removeClass('text-danger');
+          }
+
+          if (reactTo === 'comment' && reaction === 'dislike') {
+            $('#commentThumbsUp').removeClass('text-danger');
+            $('#commentThumbsDown').addClass('text-danger');
+          }
+
+        }
+      });
+  }
+</script>
