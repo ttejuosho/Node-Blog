@@ -167,15 +167,39 @@ module.exports = (app) => {
   app.get("/api/react/:reactTo/:reaction/:reactToId", (req, res) => {
     if (
       (req.params.reaction.toLowerCase() === "like" ||
-        req.params.reaction.toLowerCase() === "dislike") &&
+        req.params.reaction.toLowerCase() === "dislike" || 
+        req.params.reaction.toLowerCase() === "save" || 
+        req.params.reaction.toLowerCase() === "unsave" ) &&
       (req.params.reactTo.toLowerCase() === "post" ||
-        req.params.reactTo.toLowerCase() === "comment")
+        req.params.reactTo.toLowerCase() === "comment") 
     ) {
       // POST SECTION
       if (req.params.reactTo.toLowerCase() === "post") {
         db.Post.findByPk(req.params.reactToId)
           .then((dbPost) => {
             if (dbPost !== null) {
+
+              if(req.params.reaction === "save"){
+                db.SavedPost.findOne({
+                  where: {
+                    PostPostId: req.params.reactToId,
+                    UserUserId: req.user.userId,
+                  },
+                }).then((dbSavedPost)=>{
+                  if (dbSavedPost === null){
+                    db.SavedPost.create({
+                      PostPostId: req.params.reactToId,
+                      UserUserId: req.user.userId,
+                    }).then((dbSavedPost)=>{
+                      res.json({ savedPostId: dbSavedPost.dataValues.savedPostId });
+                    })
+                  } else {
+                    return res.json({ response: "Post has already been saved." });
+                  }
+                  
+                })
+              } else {
+
               var likesCount = dbPost.dataValues.likesCount;
               var dislikesCount = dbPost.dataValues.dislikesCount;
 
@@ -246,12 +270,25 @@ module.exports = (app) => {
                   res.json({ response: "Action already taken on post" });
                 }
               });
+            }
+              //
             } else {
-              res.json({ error: "Post not found" });
+              if(req.params.reaction === "unsave"){
+                db.SavedPost.destroy({
+                  where: {
+                    savedPostId: req.params.reactToId
+                  }
+                }).then(()=>{
+                  return res.json({ unsaved: true });
+                })
+              } else {
+                res.json({ response: "Post not found" });
+              }
+
             }
           })
           .catch((err) => {
-            res.json(err);
+            res.json({ Error: err });
           });
       }
       // END POST SECTION

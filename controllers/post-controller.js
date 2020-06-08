@@ -123,6 +123,7 @@ exports.getPost = (req, res) => {
           postAuthorTwitter: dbPost.User.dataValues.twitter,
           postAuthorGithub: dbPost.User.dataValues.github,
           following: false,
+          saved: false,
           Comments: [],
         };
 
@@ -148,19 +149,6 @@ exports.getPost = (req, res) => {
         }
 
         if (req.user) {
-          db.Follower.findOne({
-            where: {
-              followedUserUsername: hbsObject.postAuthorUsername,
-              UserUserId: req.user.userId,
-            },
-          }).then((dbFollower) => {
-            if (dbFollower !== null) {
-              hbsObject.following = true;
-            }
-            //console.log(hbsObject);
-            return res.render("post/viewPost", hbsObject);
-          });
-
           if (res.locals.userId !== dbPost.dataValues.UserUserId) {
             // If signed in user isnt the post creator, Add to recentlyViewed table
             db.RecentlyViewed.findOrCreate({
@@ -170,6 +158,32 @@ exports.getPost = (req, res) => {
               },
             });
           }
+
+          db.Follower.findOne({
+            where: {
+              followedUserUsername: hbsObject.postAuthorUsername,
+              UserUserId: req.user.userId,
+            },
+          }).then((dbFollower) => {
+            if (dbFollower !== null) {
+              hbsObject.following = true;
+            }
+          });
+
+          db.SavedPost.findOne({
+            where: {
+              PostPostId: req.params.postId,
+              UserUserId: req.user.userId,
+            },
+          }).then((dbSavedPost)=>{
+            if (dbSavedPost !== null){
+              hbsObject.saved = true;
+              hbsObject.savedPostId = dbSavedPost.dataValues.savedPostId;
+            }
+            //console.log(hbsObject);
+            return res.render("post/viewPost", hbsObject);
+          });
+
         } else {
           return res.render("post/viewPost", hbsObject);
         }

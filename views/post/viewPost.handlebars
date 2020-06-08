@@ -1,7 +1,7 @@
 <main role="main" class="container">
   <div class="row pt-2">
     <div class="col-md-8 blog-main">
-
+      <input type="hidden" id="postId" value="{{postId}}"/>
       {{#if message}}
       <p>{{message}}</p>
       {{else}}
@@ -14,9 +14,17 @@
         {{{postBody}}}
 
         <p class="float-right">
+          {{#unless saved}}
+          <span id="savePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Save post"
+            onclick="reactTo(`post`,`save`, `{{postId}}`)"><i class="far fa-save fa-2x mr-2"></i>
+          </span>
+          {{else}}
+          <span id="unsavePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Unsave post"
+            onclick="reactTo(`post`,`unsave`, `{{savedPostId}}`)"><i class="fas fa-save fa-2x mr-2"></i>
+          </span>
+          {{/unless}}
           <span id="thumbsUp" class="mr-2 pointer" data-toggle="tooltip" data-placement="bottom" title="Like post"
             onclick="reactTo(`post`,`like`, `{{postId}}`)">
-
             <i class="far fa-thumbs-up fa-2x mr-2"></i><small class="likesCount text-success">{{likesCount}}</small>
           </span>
           <span id="thumbsDown" class="pointer" data-toggle="tooltip" data-placement="bottom" title="Dislike post"
@@ -25,7 +33,7 @@
               class="dislikesCount text-danger mr-2">{{dislikesCount}}</small>
           </span>
           <span id="banIcon" class="pointer" data-toggle="tooltip" data-placement="bottom" title="Report post"
-            onclick="reactToPost(`report`, `{{postId}}`)">
+            onclick="reactToPost(`post`,`report`, `{{postId}}`)">
             <i class="fas fa-ban fa-2x text-danger mr-2"></i>
           </span>
         </p>
@@ -187,40 +195,45 @@
     var reVal = reaction;
     fetch(`/api/react/${reactTo}/${reaction}/${reactToId}`).then(response => response.json())
       .then((data) => {
+        
         if (!data.response) {
-
-          if (reactTo === 'post') {
-            $('.likesCount').text(data.likesCount);
-            $('.dislikesCount').text(data.dislikesCount);
-            $('#thumbsUp').removeClass('text-danger');
-            $('#thumbsDown').removeClass('text-danger');
+          var postId = $("#postId").val();
+          if(reactTo === 'post' && reaction === 'save'){
+            $('#savePost').html('<i class="fas fa-save fa-2x mr-2"></i>');
+            $('#savePost').attr('onclick', "reactTo(`post`, `unsave`, `" + data.savedPostId + "`)");
+            $('#savePost').attr('title', 'Unsave post');
           }
 
-          if (reactTo === 'comment') {
-            $('.commentLikesCount').text(data.likesCount);
-            $('.commentDislikesCount').text(data.dislikesCount);
-            $('#commentThumbsUp').removeClass('text-danger');
-            $('#commentThumbsDown').removeClass('text-danger');
+          if(reactTo === 'post' && reaction === 'unsave'){
+            $('#savePost').html('<i class="far fa-save fa-2x mr-2"></i>');
+            $('#savePost').attr('onclick', "reactTo(`post`, `save`, `" + postId + "`)");
+            $('#savePost').attr('title', 'Save post');
           }
-
-        } else {
 
           if (reactTo === 'post' && reaction === 'like') {
+            $('.likesCount').text(data.likesCount);
+            $('.dislikesCount').text(data.dislikesCount);
             $('#thumbsUp').addClass('text-danger');
             $('#thumbsDown').removeClass('text-danger');
           }
 
           if (reactTo === 'post' && reaction === 'dislike') {
+            $('.likesCount').text(data.likesCount);
+            $('.dislikesCount').text(data.dislikesCount);
             $('#thumbsUp').removeClass('text-danger');
             $('#thumbsDown').addClass('text-danger');
           }
 
           if (reactTo === 'comment' && reaction === 'like') {
+            $('.commentLikesCount').text(data.likesCount);
+            $('.commentDislikesCount').text(data.dislikesCount);
             $('#commentThumbsUp').addClass('text-danger');
             $('#commentThumbsDown').removeClass('text-danger');
           }
 
           if (reactTo === 'comment' && reaction === 'dislike') {
+            $('.commentLikesCount').text(data.likesCount);
+            $('.commentDislikesCount').text(data.dislikesCount);
             $('#commentThumbsUp').removeClass('text-danger');
             $('#commentThumbsDown').addClass('text-danger');
           }
