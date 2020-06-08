@@ -9,13 +9,53 @@ exports.getProfilePage = (req, res) => {
     order: [["createdAt", "DESC"]],
   })
     .then((dbPost) => {
-      var hbsObject = { Posts: [] };
+      var hbsObject = { Posts: [], SavedPosts: [] };
       if (dbPost !== null) {
         for (var i = 0; i < dbPost.length; i++) {
           hbsObject.Posts.push(dbPost[i].dataValues);
         }
+
         hbsObject.isOwner = true;
-        res.render("user/profile", hbsObject);
+        
+        db.SavedPost.findAll({
+          where: {
+            UserUserId: req.user.userId
+          },
+            include: [
+              {
+                model: db.Post,
+                as: "Post",
+                attributes: [
+                  "postId",
+                  "postTitle",
+                  "postBody",
+                  "postImage",
+                  "postCategory",
+                  "postDescription",
+                  "isDraft",
+                  "published",
+                  "viewCount",
+                ],
+              },
+            ],
+        }).then((dbSavedPost)=>{          
+          if(dbSavedPost !== null){           
+            for (var i = 0; i < dbSavedPost.length; i++) {
+              //console.log(dbSavedPost[i].dataValues.Post.dataValues);
+              //console.log(hbsObject);
+              hbsObject.SavedPosts.push(dbSavedPost[i].dataValues.Post.dataValues);
+              hbsObject.SavedPosts[i].savedOn = dbSavedPost[i].dataValues.createdAt;
+            }
+
+            //console.log(hbsObject);
+            res.render("user/profile", hbsObject);
+          }
+
+
+        }).catch((err) => {
+          res.render("error", { error: err });
+        });
+
       }
     })
     .catch((err) => {
