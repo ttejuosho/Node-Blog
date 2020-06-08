@@ -3,7 +3,6 @@ const Security = require('../services/security/security.js');
 const {check} = require('express-validator');
 
 module.exports = function(app) {
-    app.get('/', postController.getHomePage);
 
     app.get('/newPost', Security.isLoggedIn , postController.newPostPage);
 
@@ -22,6 +21,8 @@ module.exports = function(app) {
 
     app.get('/post/publish/:postId', postController.publishPost);
     app.get('/post/unpublish/:postId', postController.unpublishPost);
-    app.get('/post/reactions/:postId', postController.getReactions);
-    app.post('/post/comment/:postId', Security.isLoggedIn, postController.commentOnPost);
+    app.get('/post/getcomments/:postId', postController.getCommentsPage);
+    app.post('/post/newcomment/:postId', Security.isLoggedIn, postController.commentOnPost);
+    app.get('/recentlyviewed', Security.isLoggedIn, postController.recentlyViewed);
+    app.get('/savePost', Security.isLoggedIn, postController.savePost);
 }

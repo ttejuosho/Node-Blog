@@ -35,6 +35,8 @@
       href="#posts" aria-controls="posts" aria-selected="true">Posts</a></li>
   <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark" id="drafts-tab" data-toggle="tab"
       href="#drafts" aria-controls="drafts" aria-selected="false">Drafts</a></li>
+  <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark" id="saved-tab" data-toggle="tab"
+    href="#saved" aria-controls="saved" aria-selected="false">Saved</a></li>
   {{else}}
   <li class="nav-item"><a class="nav-link lead font-weight-bold text-dark active" id="posts-tab" data-toggle="tab"
       href="#posts" aria-controls="posts" aria-selected="true">Posts</a></li>
@@ -115,6 +117,31 @@
     {{/each}}
   </div>
   {{/if}}
+
+  <div id="saved" class="tab-pane fade" role="tabpanel" aria-labelledby="saved-tab">
+    {{#unless SavedPosts}}<p> You have no saved posts. </p>{{/unless}}
+    {{#each SavedPosts}}
+      {{#if published}}
+        <div class="row mb-2">
+          <div class="col-md-12">
+            <div
+              class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+              <div class="col p-4 d-flex flex-column position-static">
+                <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
+                <h3 class="mb-0 text-dark"><a class="text-dark" href="/post/{{postId}}">{{postTitle}}</a></h3>
+                <p class="card-text mb-auto">{{postDescription}}</p>
+                <div class="mb-1 text-muted">Saved On: {{#formatDate savedOn}} {{/formatDate}}</div>
+                <small class="form-text text-muted mb-2">Viewed {{viewCount}} times</small>
+              </div>
+              <div class="col-auto d-none d-lg-block">
+                <img src="{{postImage}}" style="height: 250px;" />
+              </div>
+            </div>
+          </div>
+        </div>
+      {{/if}}
+    {{/each}}
+  </div>
 </div>
 
 <div class="modal fade" id="confirmDeletePostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"

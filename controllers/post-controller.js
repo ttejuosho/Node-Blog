@@ -2,19 +2,14 @@ const db = require("../models");
 const upload = require("../services/Utils/upload.js");
 const sequelize = require("sequelize");
 
-// Render new home page
-exports.getHomePage = (req, res) => {
-  return res.render("index", {
-    title: "TaiBlog",
-  });
-};
-
+// Get the new post page
 exports.newPostPage = (req, res) => {
   return res.render("post/newPost", {
     title: "New Post",
   });
 };
 
+// Create new post
 exports.createNewPost = (req, res) => {
   const singleUpload = upload.single("postImage");
   singleUpload(req, res, (err) => {
@@ -47,6 +42,7 @@ exports.createNewPost = (req, res) => {
   });
 };
 
+// Get a Post
 exports.getPost = (req, res) => {
   var hbsObject = {};
   db.Post.findByPk(req.params.postId, {
@@ -164,6 +160,16 @@ exports.getPost = (req, res) => {
             //console.log(hbsObject);
             return res.render("post/viewPost", hbsObject);
           });
+
+          if (res.locals.userId !== dbPost.dataValues.UserUserId) {
+            // If signed in user isnt the post creator, Add to recentlyViewed table
+            db.RecentlyViewed.findOrCreate({
+              where: {
+                PostPostId: req.params.postId,
+                UserUserId: req.user.userId,
+              },
+            });
+          }
         } else {
           return res.render("post/viewPost", hbsObject);
         }
@@ -176,6 +182,7 @@ exports.getPost = (req, res) => {
     });
 };
 
+// Get Post data to be editted
 exports.getEditPost = async (req, res, next) => {
   try {
     db.Post.findOne({
@@ -206,6 +213,7 @@ exports.getEditPost = async (req, res, next) => {
   }
 };
 
+// Update a post
 exports.updatePost = async (req, res, next) => {
   try {
     const singleUpload = upload.single("postImage");
@@ -254,6 +262,7 @@ exports.updatePost = async (req, res, next) => {
   }
 };
 
+// Publish a post
 exports.publishPost = (req, res) => {
   db.Post.findOne({
     where: {
@@ -284,6 +293,7 @@ exports.publishPost = (req, res) => {
     });
 };
 
+// Unpublish a post
 exports.unpublishPost = (req, res) => {
   db.Post.findOne({
     where: {
@@ -314,6 +324,7 @@ exports.unpublishPost = (req, res) => {
     });
 };
 
+// Delete a post
 exports.deletePost = (req, res) => {
   db.Post.findOne({
     where: {
@@ -359,10 +370,7 @@ exports.newReaction = (req, res) => {
                 model: db.Reaction,
                 limit: 10,
                 as: "Reaction",
-                attributes: [
-                  "reactionId",
-                  "reaction",
-                ],
+                attributes: ["reactionId", "reaction"],
               },
             ],
           })
@@ -407,16 +415,144 @@ exports.getReactions = (req, res) => {
     });
 };
 
+// [Post] new Comment
 exports.commentOnPost = (req, res) => {
-  db.Post.findByPk(req.params.postId).then((dbPost) => {
-    if (dbPost !== null && dbPost.dataValues.published === true) {
-      db.Comment.create({
-        commentBody: req.body.commentBody,
-        PostPostId: req.params.postId,
-        UserUserId: req.user.userId,
-      }).then((dbComment) => {
-        return res.redirect("/post/" + req.params.postId);
+  db.Post.findByPk(req.params.postId)
+    .then((dbPost) => {
+      if (dbPost !== null && dbPost.dataValues.published === true) {
+        db.Comment.create({
+          commentBody: req.body.commentBody,
+          PostPostId: req.params.postId,
+          UserUserId: req.user.userId,
+        })
+          .then((dbComment) => {
+            return res.redirect("/post/" + req.params.postId);
+          })
+          .catch((err) => {
+            res.render("error", { error: err });
+          });
+      }
+    })
+    .catch((err) => {
+      res.render("error", { error: err });
+    });
+};
+
+// [Get] all recently viewed posts
+exports.recentlyViewed = (req, res) => {
+  db.RecentlyViewed.findAll({
+    where: {
+      UserUserId: req.user.userId,
+    },
+    include: [
+      {
+        model: db.Post,
+        as: "Post",
+        attributes: [
+          "postId",
+          "postTitle",
+          "postBody",
+          "postImage",
+          "postDescription",
+          "isDraft",
+          "published",
+          "viewCount",
+        ],
+      },
+    ],
+  }).then((dbPost) => {
+    var hbsObject = { recentlyViewedPosts: [] };
+    dbPost.forEach((post, i) => {
+      var viewedPost = {
+        postId: post.Post.postId,
+        postTitle: post.Post.postTitle,
+        postBody: post.Post.postBody,
+        postImage: post.Post.postImage,
+        postDescription: post.Post.postDescription,
+        viewCount: post.Post.viewCount,
+        viewedOn: post.createdAt,
+        published: post.Post.published,
+        recentlyViewedId: post.recentlyViewedId,
+      };
+
+      hbsObject.recentlyViewedPosts.push(viewedPost);
+    });
+    //console.log(hbsObject);
+    res.render("post/recentlyViewed", hbsObject);
+  });
+};
+
+// Render page to view all comments for a post
+exports.getCommentsPage = (req, res) => {
+  db.Comment.findAll({
+    where: {
+      PostPostId: req.params.postId,
+    },
+    include: [
+      {
+        model: db.User,
+        as: "User",
+        attributes: ["userId", "username", "name", "shortName", "profileImage"],
+      },
+      {
+        model: db.Post,
+        as: "Post",
+        attributes: ["postId", "postTitle"],
+      },
+    ],
+    order: [["createdAt", "DESC"]],
+  })
+    .then((dbComment) => {
+      var hbsObject = {
+        postId: dbComment[0].dataValues.PostPostId,
+        postTitle: dbComment[0].dataValues.Post.dataValues.postTitle,
+        Comments: [],
+      };
+      dbComment.forEach((comment, i) => {
+        var commentObject = {
+          commentId: comment.dataValues.commentId,
+          commentBody: comment.dataValues.commentBody,
+          likesCount: comment.dataValues.likesCount,
+          dislikesCount: comment.dataValues.dislikesCount,
+          createdAt: comment.dataValues.createdAt,
+          commentByUserId: comment.dataValues.UserUserId,
+          commentByUsername: comment.dataValues.User.dataValues.username,
+          commentByName: comment.dataValues.User.dataValues.name,
+          commentByProfileImage:
+            comment.dataValues.User.dataValues.profileImage,
+        };
+
+        hbsObject.Comments.push(commentObject);
       });
+
+      res.render("post/viewComments", hbsObject);
+    })
+    .catch((err) => {
+      res.render("error", { error: err });
+    });
+};
+
+// Mark post as saved
+exports.savePost = (req,res) => {
+  db.Post.findByPk(req.param.postId).then((dbPost)=>{
+    if(dbPost !== null){
+      if (res.locals.userId !== dbPost.dataValues.UserUserId) {
+        // If signed in user isnt the post creator, Add to Saved Post table
+        db.SavedPost.findOrCreate({
+          where: {
+            PostPostId: req.params.postId,
+            UserUserId: req.user.userId,
+          },
+        }).then((dbSavedPost)=>{
+          res.json(dbSavedPost);
+        }).catch((err)=>{
+          res.render("error", { error: err });
+        });
+      }
+    } else {
+      res.json({ response: "Post not found." });
     }
+  }).catch((err)=>{
+    res.render("error", { error: err });
   });
 };

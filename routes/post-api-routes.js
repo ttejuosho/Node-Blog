@@ -345,7 +345,7 @@ module.exports = (app) => {
     }
   });
 
-  app.post("/api/post/comment/:postId", (req, res) => {
+  app.post("/api/post/newcomment/:postId", (req, res) => {
     try {
       if (!req.user) {
         return res.json({ response: "Please sign in to post a comment" });
@@ -472,7 +472,7 @@ module.exports = (app) => {
     });
   });
 
-  app.get('/api/post/comments/:postId', (req,res)=>{
+  app.get('/api/post/getcomments/:postId', (req,res)=>{
     db.Comment.findAll({
       where: {
         PostPostId: req.params.postId,
@@ -493,5 +493,65 @@ module.exports = (app) => {
     }).then((dbComment)=>{
       res.json(dbComment);
     })
-  })
+  });
+
+  // Add Post to Saved Post
+  app.get('/api/savePost/:postId', (req,res)=>{
+    db.Post.findByPk(req.params.postId).then((dbPost)=>{
+      if(dbPost !== null){
+        if (res.locals.userId !== dbPost.dataValues.UserUserId) {
+          // If signed in user isnt the post creator, Add to Saved Post table
+          db.SavedPost.findOrCreate({
+            where: {
+              PostPostId: req.params.postId,
+              UserUserId: req.user.userId,
+            },
+          }).then((dbSavedPost)=>{
+            // findorcreate [0] = returnedPost, [1] = true
+            res.json(dbSavedPost);
+          }).catch((err)=>{
+            res.json({ Error: err });
+          });
+        } else {
+          res.json({ response: "This is your post." });
+        }
+      } else {
+        res.json({ response: "Post not found." });
+      }
+    }).catch((err)=>{
+      res.json({ Error: err });
+    });
+  });
+
+  app.get("/api/post/getSavedPosts", (req,res)=>{
+    if(!req.isAuthenticated()){
+      return res.json("Please sign in.");
+    }
+    db.SavedPost.findAll({
+      where: {
+        UserUserId: req.user.userId
+      },
+        include: [
+          {
+            model: db.Post,
+            as: "Post",
+            attributes: [
+              "postId",
+              "postTitle",
+              "postBody",
+              "postImage",
+              "postDescription",
+              "isDraft",
+              "published",
+              "viewCount",
+            ],
+          },
+        ],
+    }).then((dbSavedPost)=>{
+      res.json(dbSavedPost);
+    }).catch((err)=> {
+      res.json(err);
+    });
+  });
+
 };

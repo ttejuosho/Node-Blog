@@ -3,7 +3,7 @@ const db = require("../models");
 module.exports = (app) => {
 
   app.get("/api/profile", (req, res) => {
-    db.User.findByPk(req.session.passport.user, {
+    db.User.findByPk(req.user.userId, {
       attributes: {
         exclude: ["password"],
       },
@@ -11,6 +11,20 @@ module.exports = (app) => {
         {
           model: db.Post,
           as: "Posts",
+          attributes: [
+            "postId",
+            "postTitle",
+            "postBody",
+            "postImage",
+            "postDescription",
+            "isDraft",
+            "published",
+            "viewCount",
+          ],
+        },
+        {
+          model: db.SavedPost,
+          as: "SavedPosts",
           attributes: [
             "postId",
             "postTitle",
