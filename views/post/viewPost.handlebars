@@ -14,14 +14,16 @@
         {{{postBody}}}
 
         <p class="float-right">
-          {{#unless saved}}
-          <span id="savePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Save post"
-            onclick="reactTo(`post`,`save`, `{{postId}}`)"><i class="far fa-save fa-2x mr-2"></i>
-          </span>
-          {{else}}
-          <span id="unsavePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Unsave post"
-            onclick="reactTo(`post`,`unsave`, `{{savedPostId}}`)"><i class="fas fa-save fa-2x mr-2"></i>
-          </span>
+          {{#unless isOwner}}
+            {{#unless saved}}
+            <span id="savePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Save post"
+              onclick="reactTo(`post`,`save`, `{{postId}}`)"><i class="far fa-save fa-2x mr-2"></i>
+            </span>
+            {{else}}
+              <span id="unsavePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Unsave post"
+                onclick="reactTo(`post`,`unsave`, `{{savedPostId}}`)"><i class="fas fa-save fa-2x mr-2"></i>
+              </span>
+            {{/unless}}
           {{/unless}}
           <span id="thumbsUp" class="mr-2 pointer" data-toggle="tooltip" data-placement="bottom" title="Like post"
             onclick="reactTo(`post`,`like`, `{{postId}}`)">
@@ -37,7 +39,9 @@
             <i class="fas fa-ban fa-2x text-danger mr-2"></i>
           </span>
         </p>
+        
       </div><!-- /.blog-post -->
+      <p class="text-danger postActionResponse"></p>
       <h4>Comments</h4>
       <div id="commentSection" class="blog-post">
 
@@ -195,7 +199,7 @@
     var reVal = reaction;
     fetch(`/api/react/${reactTo}/${reaction}/${reactToId}`).then(response => response.json())
       .then((data) => {
-        
+
         if (!data.response) {
           var postId = $("#postId").val();
           if(reactTo === 'post' && reaction === 'save'){
@@ -238,6 +242,8 @@
             $('#commentThumbsDown').addClass('text-danger');
           }
 
+        } else {
+          $('.postActionResponse').text(data.response);
         }
       });
   }

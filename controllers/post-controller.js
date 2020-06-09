@@ -157,6 +157,8 @@ exports.getPost = (req, res) => {
                 UserUserId: req.user.userId,
               },
             });
+          } else {
+            hbsObject.isOwner = true;
           }
 
           db.Follower.findOne({
@@ -175,15 +177,14 @@ exports.getPost = (req, res) => {
               PostPostId: req.params.postId,
               UserUserId: req.user.userId,
             },
-          }).then((dbSavedPost)=>{
-            if (dbSavedPost !== null){
+          }).then((dbSavedPost) => {
+            if (dbSavedPost !== null) {
               hbsObject.saved = true;
               hbsObject.savedPostId = dbSavedPost.dataValues.savedPostId;
             }
             //console.log(hbsObject);
             return res.render("post/viewPost", hbsObject);
           });
-
         } else {
           return res.render("post/viewPost", hbsObject);
         }
@@ -547,26 +548,30 @@ exports.getCommentsPage = (req, res) => {
 };
 
 // Mark post as saved
-exports.savePost = (req,res) => {
-  db.Post.findByPk(req.param.postId).then((dbPost)=>{
-    if(dbPost !== null){
-      if (res.locals.userId !== dbPost.dataValues.UserUserId) {
-        // If signed in user isnt the post creator, Add to Saved Post table
-        db.SavedPost.findOrCreate({
-          where: {
-            PostPostId: req.params.postId,
-            UserUserId: req.user.userId,
-          },
-        }).then((dbSavedPost)=>{
-          res.json(dbSavedPost);
-        }).catch((err)=>{
-          res.render("error", { error: err });
-        });
+exports.savePost = (req, res) => {
+  db.Post.findByPk(req.param.postId)
+    .then((dbPost) => {
+      if (dbPost !== null) {
+        if (res.locals.userId !== dbPost.dataValues.UserUserId) {
+          // If signed in user isnt the post creator, Add to Saved Post table
+          db.SavedPost.findOrCreate({
+            where: {
+              PostPostId: req.params.postId,
+              UserUserId: req.user.userId,
+            },
+          })
+            .then((dbSavedPost) => {
+              res.json(dbSavedPost);
+            })
+            .catch((err) => {
+              res.render("error", { error: err });
+            });
+        }
+      } else {
+        res.json({ response: "Post not found." });
       }
-    } else {
-      res.json({ response: "Post not found." });
-    }
-  }).catch((err)=>{
-    res.render("error", { error: err });
-  });
+    })
+    .catch((err) => {
+      res.render("error", { error: err });
+    });
 };
