@@ -1,4 +1,5 @@
 const db = require("../models");
+const {check} = require('express-validator');
 
 module.exports = (app) => {
 
@@ -253,7 +254,11 @@ module.exports = (app) => {
       });
   });
 
-  app.post("/api/subscribe/:subscribeTo/:subscribeToId", (req, res) => {
+  app.post("/api/subscribe/:subscribeTo/:subscribeToId", 
+  [
+    check('subscriberEmail').not().isEmpty().escape().withMessage('Email is required'),
+  ]
+  ,(req, res) => {
     if (
       req.params.subscribeTo === "user" ||
       req.params.subscribeTo === "post"

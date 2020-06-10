@@ -1,5 +1,6 @@
 const db = require("../models");
 const Sequelize = require("sequelize");
+const { check } = require("express-validator");
 const Op = Sequelize.Op;
 const operatorsAliases = {
   $eq: Op.eq,
@@ -395,27 +396,31 @@ module.exports = (app) => {
       if (!req.user) {
         return res.json({ response: "Please sign in to post a comment" });
       } else {
-        db.Post.findByPk(req.params.postId).then((dbPost) => {
-          if (dbPost !== null && dbPost.dataValues.published === true) {
-            db.Comment.create({
-              commentBody: req.body.commentBody,
-              PostPostId: req.params.postId,
-              UserUserId: req.user.userId,
-            }).then((dbComment) => {
-              db.Comment.findByPk(dbComment.dataValues.commentId, {
-                include: [
-                  {
-                    model: db.User,
-                    as: "User",
-                    attributes: ["profileImage", "userId", "name"],
-                  },
-                ],
-              }).then((data) => {
-                res.json(data);
+        if (req.body.commentBody.trim().length > 2) {
+          db.Post.findByPk(req.params.postId).then((dbPost) => {
+            if (dbPost !== null && dbPost.dataValues.published === true) {
+              db.Comment.create({
+                commentBody: req.body.commentBody,
+                PostPostId: req.params.postId,
+                UserUserId: req.user.userId,
+              }).then((dbComment) => {
+                db.Comment.findByPk(dbComment.dataValues.commentId, {
+                  include: [
+                    {
+                      model: db.User,
+                      as: "User",
+                      attributes: ["profileImage", "userId", "name"],
+                    },
+                  ],
+                }).then((data) => {
+                  res.json(data);
+                });
               });
-            });
-          }
-        });
+            }
+          });
+        } else {
+          return res.json({ response: "Comment length is too short." });
+        }
       }
     } catch (err) {
       res.json(err);
@@ -620,4 +625,119 @@ module.exports = (app) => {
         res.json(err);
       });
   });
+
+  app.post(
+    "/api/report/post",
+    [
+      check("reportedFor")
+        .not()
+        .isEmpty()
+        .escape()
+        .withMessage("Validation error, please refresh and try again"),
+      check("reportedPostId")
+        .not()
+        .isEmpty()
+        .escape()
+        .withMessage("Post Id required, please refresh and try again"),
+    ],
+    (req, res) => {
+      if (!req.isAuthenticated()) {
+        return res.status(401).send({ response: "Please sign in" });
+      } else {
+        // Check Post Id if Valid and if post is being reported by Post Author
+        db.Post.findByPk(req.body.postId).then((dbPost) => {
+          if (
+            dbPost === null ||
+            dbPost.dataValues.UserUserId === req.user.userId
+          ) {
+            return res.status(400).send({ response: "Something went wrong, please try again" });
+          } else {
+            db.Complaint.create({
+              reported: "post",
+              reportedFor: req.body.reportedFor,
+              reportedBy: req.user.userId,
+              reportedPostId: req.body.postId,
+            })
+              .then((dbComplaint) => {
+                if (
+                  req.body.blockUser === "true" &&
+                  req.body.blockedUserId.length > 12
+                ) {
+                  db.BlockedUser.create({
+                    blockedUser: req.body.blockedUserId,
+                    blockedByUser: req.user.userId,
+                  }).then((dbBlockedUser) => {
+                    res.json({ response: "Thanks for your input. We will look into this right away." });
+                  });
+                } else {
+                  res.json({ response: "Thanks for your input. We will look into this right away." });
+                }
+              })
+              .catch((err) => {
+                res.json({ response: err });
+              });
+          }
+        });
+      }
+    }
+  );
+
+  app.post(
+    "/api/report/comment",
+    [
+      check("reportedFor")
+        .not()
+        .isEmpty()
+        .escape()
+        .withMessage("Validation error, please refresh and try again"),
+      check("reportedCommentId")
+        .not()
+        .isEmpty()
+        .escape()
+        .withMessage("Comment Id required, please refresh and try again"),
+    ],
+    (req, res) => {
+      if (!req.isAuthenticated()) {
+        return res.status(401).send({ response: "Please sign in" });
+      }
+
+      db.Comment.findByPk(req.body.commentId).then((dbComment) => {
+        if (
+          dbComment === null ||
+          dbComment.dataValues.UserUserId === req.user.userId
+        ) {
+          return res.status(400).send({ response: "Something went wrong, please try again" });
+        }
+      });
+
+      db.Complaint.create({
+        reported: "comment",
+        reportedFor: req.body.reportedFor,
+        reportedBy: req.user.userId,
+        reportedCommentId: req.body.commentId,
+      })
+        .then((dbComplaint) => {
+          if (
+            req.body.blockUser === "true" &&
+            req.body.blockedUserId.length > 12
+          ) {
+            db.BlockedUser.create({
+              blockedUser: req.body.blockedUserId,
+              blockedByUser: req.user.userId,
+            })
+              .then((dbBlockedUser) => {
+                res.json({ response: true });
+              })
+              .catch((err) => {
+                res.json({ response: err });
+              });
+          } else {
+            res.json({ response: true });
+          }
+        })
+        .catch((err) => {
+          res.json({ response: err });
+        });
+    }
+  );
 };

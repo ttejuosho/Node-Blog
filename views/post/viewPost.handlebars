@@ -1,7 +1,8 @@
 <main role="main" class="container">
   <div class="row pt-2">
     <div class="col-md-8 blog-main">
-      <input type="hidden" id="postId" value="{{postId}}"/>
+      <input type="hidden" id="postId" value="{{postId}}" />
+      <input type="hidden" id="postAuthorUserId" value="{{postAuthorUserId}}" />
       {{#if message}}
       <p>{{message}}</p>
       {{else}}
@@ -15,15 +16,15 @@
 
         <p class="float-right">
           {{#unless isOwner}}
-            {{#unless saved}}
-            <span id="savePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Save post"
-              onclick="reactTo(`post`,`save`, `{{postId}}`)"><i class="far fa-save fa-2x mr-2"></i>
-            </span>
-            {{else}}
-              <span id="unsavePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Unsave post"
-                onclick="reactTo(`post`,`unsave`, `{{savedPostId}}`)"><i class="fas fa-save fa-2x mr-2"></i>
-              </span>
-            {{/unless}}
+          {{#unless saved}}
+          <span id="savePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Save post"
+            onclick="reactTo(`post`,`save`, `{{postId}}`)"><i class="far fa-save fa-2x mr-2"></i>
+          </span>
+          {{else}}
+          <span id="unsavePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Unsave post"
+            onclick="reactTo(`post`,`unsave`, `{{savedPostId}}`)"><i class="fas fa-save fa-2x mr-2"></i>
+          </span>
+          {{/unless}}
           {{/unless}}
           <span id="thumbsUp" class="mr-2 pointer" data-toggle="tooltip" data-placement="bottom" title="Like post"
             onclick="reactTo(`post`,`like`, `{{postId}}`)">
@@ -35,11 +36,11 @@
               class="dislikesCount text-danger mr-2">{{dislikesCount}}</small>
           </span>
           <span id="banIcon" class="pointer" data-toggle="tooltip" data-placement="bottom" title="Report post"
-            onclick="reactToPost(`post`,`report`, `{{postId}}`)">
+            onclick="openReportPostModal(`{{postId}}`)">
             <i class="fas fa-ban fa-2x text-danger mr-2"></i>
           </span>
         </p>
-        
+
       </div><!-- /.blog-post -->
       <p class="text-danger postActionResponse"></p>
       <h4>Comments</h4>
@@ -57,7 +58,7 @@
               </div>
               <div class="col-10 pl-0 pt-2">
                 <h4 class="mb-0"><a class="text-dark" href="/profile/{{commentByUserId}}">{{commentBy}}</a></h4>
-                <h6 class="mb-0">{{#formatDate createdAt}} {{/formatDate}}</h6>
+                <h6 class="mb-0">{{#formatDateTime createdAt}} {{/formatDateTime}}</h6>
               </div>
             </div>
             <div class="row mt-1">
@@ -87,6 +88,7 @@
           <h4>Lets hear from you</h4>
           <form class="form-row" id="newCommentForm">
             <textarea class="ml-1 mr-1 w-100" name="commentBody" id="commentBody" rows="4"></textarea>
+            <p class="text-danger btn-block mb-0" id="commentsBoxErrors"></p>
             <p class="float-right mt-3 pl-1">
               <button type="button" class="btn btn-sm btn-outline-dark mr-2"
                 onclick="postComment(`{{postId}}`)">Comment</button>
@@ -104,10 +106,19 @@
 
       <div class="blog-post" id="subscribeSection">
         <h4>Subscribe to more posts from {{postAuthorShortName}}</h4>
-        <form class="form-inline">
+        <form class="form-inline" novalidate>
           <label class="sr-only" for="subscriberEmail">Email Address</label>
-          <input type="email" class="form-control mb-2 mr-sm-2" name="subscriberEmail" id="subscriberEmail" placeholder="Email address">
-          <button type="button" class="btn btn-secondary mb-2" onclick="subcribeToUser(`{{postAuthorUserId}}`)">Subscribe</button>
+          <input type="email" class="form-control mb-2 mr-sm-2" name="subscriberEmail" id="subscriberEmail"
+            placeholder="Email address" required>
+          {{#if errors}}
+            {{#each errors}}
+              {{#ifEquals param "subscriberEmail"}}
+                <div class="messages text-danger font-weight-bold">{{msg}}</div>
+              {{/ifEquals}}
+            {{/each}}
+          {{/if}}
+          <button type="button" class="btn btn-secondary mb-2"
+            onclick="subcribeToUser(`{{postAuthorUserId}}`)">Subscribe</button>
         </form>
       </div><!-- /.blog-post -->
       {{/if}}
@@ -118,12 +129,11 @@
         <h4 class="font-italic">About {{postAuthorShortName}}</h4>
         <p class="mb-0">{{postAuthorAbout}}</p>
         {{#unless following}}
-        <input type="button" class="btn btn-secondary followButton mt-2" onclick="followUser(`{{username}}`)"
+        <input type="button" class="btn btn-secondary followButton mt-2" onclick="followUser(`{{postAuthorUsername}}`)"
           value="Follow" />
         {{else}}
         <input type="button" class="btn btn-outline-secondary followButton mt-2" value="Following" />
         {{/unless}}
-        {{!-- <input type="button" class="btn btn-secondary followButton mt-2" onclick="followUser(`{{postAuthorUsername}}`)" value="Follow" /> --}}
       </div>
 
       <div class="p-4">
@@ -161,32 +171,76 @@
       <div class="p-4">
         <h4 class="font-italic">Follow {{postAuthorShortName}}</h4>
         {{#unless following}}
-        <input type="button" class="btn btn-secondary followButton mt-2" onclick="followUser(`{{username}}`)"
+        <input type="button" class="btn btn-secondary followButton mt-2" onclick="followUser(`{{postAuthorUsername}}`)"
           value="Follow" />
         {{else}}
         <input type="button" class="btn btn-outline-secondary followButton mt-2" value="Following" />
         {{/unless}}
-        {{!-- <input type="button" class="btn btn-secondary followButton mt-2" onclick="followUser(`{{postAuthorUsername}}`)" value="Follow" /> --}}
-        {{!-- <span class="border border-danger rounded p-2 align-bottom followButton" onclick="followUser(`{{username}}`)">Following</span> --}}
       </div>
     </aside><!-- /.blog-sidebar -->
 
   </div><!-- /.row -->
 
-  <!-- Then put toasts within -->
-  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="toast-header">
-      <img src="..." class="rounded mr-2" alt="...">
-      <strong class="mr-auto">Bootstrap</strong>
-      <small class="text-muted">just now</small>
-      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="toast-body">
-      See? Just like this.
+  {{!-- Report Modal --}}
+  <div class="modal blurModalBg" id="reportPostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    role="dialog" aria-labelledby="reportPostModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-weight-bold text-danger" id="reportPostModalLabel">
+            <i class="fas fa-exclamation-circle text-danger"></i> Report Post </h5>
+        </div>
+        <div class="modal-body d-none" id="reportPostMessageBody"></div>
+        <form class="form" id="reportPostForm" method="POST" action="/api/report/post" novalidate>
+          <h6 class="text-danger">{{error}}</h6>
+          <div id="reportPostModalBody" class="modal-body pt-0">
+            <div class="d-block my-3">
+                {{#if errors}}
+                  {{#each errors}}
+                    {{#ifEquals param "reportedFor"}}
+                      <div class="messages text-danger font-weight-bold">{{msg}}</div>
+                    {{/ifEquals}}
+                    {{#ifEquals param "reportedPostId"}}
+                      <div class="messages text-danger font-weight-bold">{{msg}}</div>
+                    {{/ifEquals}}
+                  {{/each}}
+                {{/if}}
+              <div class="custom-control custom-radio">
+                <input id="spam" name="reportedFor" type="radio" class="custom-control-input" value="Spam" checked="" required="">
+                <label class="custom-control-label" for="spam">Spam</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input id="harrassment" name="reportedFor" type="radio" class="custom-control-input" value="Harrassment" required="">
+                <label class="custom-control-label" for="harrassment">Harrassment</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input id="ruleViolation" name="reportedFor" type="radio" class="custom-control-input" value="Rule Violation" required="">
+                <label class="custom-control-label" for="ruleViolation">Rule Violation</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input id="plagiarism" name="reportedFor" type="radio" class="custom-control-input" value="Plagiarism" required="">
+                <label class="custom-control-label" for="plagiarism">Plagiarism</label>
+              </div>
+            </div>
+            <hr class="mb-4">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" name="blockUserCheckbox" id="blockUserCheckbox" value=false />
+              <label class="custom-control-label" for="blockUserCheckbox">Block User</label>
+              <input type="hidden" name="blockedUserId" id="blockedUserId" value="" />
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-danger" data-dismiss="modal" onclick="dismissReportModal()">Close</button>
+            <button type="button" class="btn btn-outline-secondary" id="reportPostBtn" onclick="reportPost()">Report</button>
+          </div>
+        </form>
+
+      </div>
     </div>
   </div>
+
+  {{!-- End Report Modal --}}
 
 </main>
 
@@ -202,13 +256,13 @@
 
         if (!data.response) {
           var postId = $("#postId").val();
-          if(reactTo === 'post' && reaction === 'save'){
+          if (reactTo === 'post' && reaction === 'save') {
             $('#savePost').html('<i class="fas fa-save fa-2x mr-2"></i>');
             $('#savePost').attr('onclick', "reactTo(`post`, `unsave`, `" + data.savedPostId + "`)");
             $('#savePost').attr('title', 'Unsave post');
           }
 
-          if(reactTo === 'post' && reaction === 'unsave'){
+          if (reactTo === 'post' && reaction === 'unsave') {
             $('#savePost').html('<i class="far fa-save fa-2x mr-2"></i>');
             $('#savePost').attr('onclick', "reactTo(`post`, `save`, `" + postId + "`)");
             $('#savePost').attr('title', 'Save post');
@@ -245,7 +299,9 @@
         } else {
           $('.postActionResponse').text(data.response);
         }
-      });
+      }).catch((error) => {
+      console.error('Error:', error);
+    });
   }
 
   function followUser(username) {
@@ -267,63 +323,70 @@
       $('.commentSignin').removeClass("d-none");
       $('#showNewCommentBox').addClass("d-none");
     }
-
   });
 
   $('#hideNewCommentBox').click(() => {
     $('#newCommentBox').addClass('d-none');
     $('#showNewCommentBox').removeClass('d-none');
+    $('#commentsBoxErrors').text("");
   });
 
   function postComment(postId) {
-    fetch(`/api/post/newcomment/${postId}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ commentBody: $('#commentBody').val() }),
-      }
-    ).then(response => response.json())
-      .then((data) => {
-        var html = `<div class="card mb-2">
-        <div class="card-body">
-            <div class="row">
-              <div class="col-2 pr-0">
-                <img class="rounded-circle profileThumbnail" src="${data.User.profileImage}" />
+    if ($('#commentBody').val().trim().length > 2) {
+      fetch(`/api/post/newcomment/${postId}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ commentBody: $('#commentBody').val() }),
+        }
+      ).then(response => response.json())
+        .then((data) => {
+          if (data.reponse) {
+            $('#commentsBoxErrors').text(data.response);
+          } else {
+            var html = `<div class="card mb-2">
+            <div class="card-body">
+                <div class="row">
+                  <div class="col-2 pr-0">
+                    <img class="rounded-circle profileThumbnail" src="${data.User.profileImage}" />
+                  </div>
+                  <div class="col-10 pl-0 pt-2">
+                    <h4 class="mb-0"><a href="/profile/${data.UserUserId}" class="text-dark">${data.User.name}</a> </h4>
+                    <h6 class="mb-0">${moment(data.createdAt).format('MM/DD/YYYY HH:mm a')}</h6>
+                  </div>
+                </div>
+                <div class="row mt-1">
+                  <div class="col-12">
+                    <p class="mb-1">${data.commentBody}</p>
+                  </div>
+                </div>
+                <p class="float-left mb-0">
+                  <span id="commentThumbsUp" class="pointer" data-toggle="tooltip" data-placement="bottom" title="vote up" onclick="reacTo('comment', 'like', ${data.commentId} )">
+                    <i class="far fa-thumbs-up mr-2"></i><small class="commentLikesCount text-success mr-2">${data.likesCount}</small>
+                  </span>
+                  <span id="commentThumbsDown" class="pointer" data-toggle="tooltip" data-placement="bottom" title="vote down" onclick="reacTo('comment', 'dislike', ${data.commentId} )">
+                    <i class="far fa-thumbs-down mr-2"></i><small class="commentDislikesCount text-success mr-2">${data.dislikesCount}</small>
+                  </span>
+                </p>
               </div>
-              <div class="col-10 pl-0 pt-2">
-                <h4 class="mb-0"><a href="/profile/${data.UserUserId}" class="text-dark">${data.User.name}</a> </h4>
-                <h6 class="mb-0">${data.createdAt}</h6>
-              </div>
-            </div>
+            </div>`;
 
-            <div class="row mt-1">
-              <div class="col-12">
-                <p class="mb-1">${data.commentBody}</p>
-              </div>
-            </div>
+            $('#commentSection').prepend(html);
+            $('#newCommentBox').addClass('d-none');
+            $('#showNewCommentBox').removeClass('d-none');
+          }
 
-            <p class="float-left mb-0">
-              <span id="commentThumbsUp" class="pointer" data-toggle="tooltip" data-placement="bottom" title="vote up" onclick="reacTo('comment', 'like', ${data.commentId} )">
-                <i class="far fa-thumbs-up mr-2"></i><small class="commentLikesCount text-success mr-2">${data.likesCount}</small>
-              </span>
-              <span id="commentThumbsDown" class="pointer" data-toggle="tooltip" data-placement="bottom" title="vote down" onclick="reacTo('comment', 'dislike', ${data.commentId} )">
-                <i class="far fa-thumbs-down mr-2"></i><small class="commentDislikesCount text-success mr-2">${data.dislikesCount}</small>
-              </span>
-            </p>
+        }).catch((err) => {
+          console.error(err);
+        });
+    } else {
+      $('#commentsBoxErrors').text("Comment too short.");
+    }
 
-          </div>
-        </div>`;
-
-        $('#commentSection').prepend(html);
-        $('#newCommentBox').addClass('d-none');
-        $('#showNewCommentBox').removeClass('d-none');
-      }).catch((err) => {
-        console.error(err);
-      });
   }
 
-  function subcribeToUser(userId){
-    fetch(`/api/subscribe/user/${userId}`, 
+  function subcribeToUser(userId) {
+    fetch(`/api/subscribe/user/${userId}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -331,8 +394,60 @@
       }
     ).then(response => response.json())
       .then((data) => {
-        $('#subscribeSection').html('<h5>' + data.response + '</h5>');
-      });
+        $('#subscribeSection').html('<h5 class="text-danger">' + data.response + '</h5>');
+    }).catch((error) => {
+      console.error('Error:', error);
+    });
   }
+
+  function openReportPostModal(postId) {
+    $('#reportPostModal').modal({
+      backdrop: false
+    });
+    $('#reportPostModal').modal('show');
+    $("#reportPostMessageBody").addClass('d-none');
+    $("#reportPostModalBody").removeClass('d-none');
+  }
+
+  $('input[name=\'blockUserCheckbox\']').on('change', function () {
+    $(this).val(this.checked ? true : false);
+    if (this.checked === true){
+      $('#blockedUserId').val($('#postAuthorUserId').val().trim());
+    } else {
+      $('#blockedUserId').val('');
+    }
+    //$(this).val(this.checked ? $('#blockedUserId').val($('#postAuthorUserId').val().trim()) : $('#blockedUserId').val(''));
+  });
+
+function reportPost(){
+  var postData = {
+    reportedFor: $("input[name='reportedFor']:checked").val(),
+    blockUser: $('#blockUserCheckbox').val(),
+    postId: $('#postId').val()
+  }
+
+  if ($('#blockUserCheckbox').val() === "true"){
+      postData.blockedUserId = $('#blockedUserId').val();
+  }
+
+  fetch('/api/report/post', 
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(postData),
+    }).then(response => response.json())
+      .then((data) => {
+        $("#reportPostMessageBody").html("<h5>"+ data.response +"</h5>");
+        $("#reportPostMessageBody").removeClass('d-none');
+        $("#reportPostModalBody").addClass('d-none');
+    }).catch((error) => {
+      console.error('Error:', error);
+    });
+}
+
+function dismissReportModal(){
+    $("#reportPostMessageBody").removeClass('d-none');
+    $("#reportPostModalBody").addClass('d-none');
+}
 
 </script>

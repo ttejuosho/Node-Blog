@@ -336,3 +336,7 @@ main .ck-editor[role='application'] .ck.ck-content,
 .ck-word-count__words{
   float: right;
 }
+
+.blurModalBg{
+  background: rgba(255, 255, 255, 0.95);
+}
