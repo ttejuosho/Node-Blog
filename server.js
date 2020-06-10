@@ -71,6 +71,14 @@ const hbs = exphbs.create({
         return value; // moment plugin is not available, value does not have a truthy value, or value is not a valid date
       }
     },
+    formatDateTime: function (value) {
+      if (value && moment(value).isValid()) {
+        var f = "MMM Do, YYYY HH:mm a";
+        return moment(value).format(f);
+      } else {
+        return value; // moment plugin is not available, value does not have a truthy value, or value is not a valid date
+      }
+    },
   },
   defaultLayout: "main"
 });
