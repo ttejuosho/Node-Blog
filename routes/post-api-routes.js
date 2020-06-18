@@ -1,6 +1,7 @@
 const db = require("../models");
 const Sequelize = require("sequelize");
 const { check } = require("express-validator");
+var async = require("async");
 const Op = Sequelize.Op;
 const operatorsAliases = {
   $eq: Op.eq,
@@ -267,9 +268,9 @@ module.exports = (app) => {
                           reaction: req.params.reaction,
                         }).then((count) => {
                           if (req.params.reaction === "like") {
-                            res.json({ count: likesCount + 1 });
+                            res.json({ likesCount: likesCount + 1 });
                           } else {
-                            res.json({ count: dislikesCount + 1 });
+                            res.json({ dislikesCount: dislikesCount + 1 });
                           }
                         });
                       }
@@ -364,9 +365,9 @@ module.exports = (app) => {
                         reaction: req.params.reaction,
                       }).then((count) => {
                         if (req.params.reaction === "like") {
-                          res.json({ count: likesCount + 1 });
+                          res.json({ likesCount: likesCount + 1 });
                         } else {
-                          res.json({ count: dislikesCount + 1 });
+                          res.json({ dislikesCount: dislikesCount + 1 });
                         }
                       });
                     }
@@ -392,9 +393,8 @@ module.exports = (app) => {
   });
 
   app.post("/api/post/newcomment/:postId", (req, res) => {
-    try {
-      if (!req.user) {
-        return res.json({ response: "Please sign in to post a comment" });
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ response: "Please sign in to post a comment" });
       } else {
         if (req.body.commentBody.trim().length > 2) {
           db.Post.findByPk(req.params.postId).then((dbPost) => {
@@ -414,17 +414,22 @@ module.exports = (app) => {
                   ],
                 }).then((data) => {
                   res.json(data);
+                }).catch((err) => {
+                  res.json({ response: err });
                 });
+              }).catch((err) => {
+                res.json({ response: err });
               });
+            } else {
+              return res.status(400).json({ response: "Something isnt right with this post."})
             }
+          }).catch((err) => {
+            res.json({ response: err });
           });
         } else {
           return res.json({ response: "Comment length is too short." });
         }
       }
-    } catch (err) {
-      res.json(err);
-    }
   });
 
   app.get("/api/post/byTime/:startDate/:endDate", (req, res) => {
@@ -562,7 +567,7 @@ module.exports = (app) => {
   });
 
   // Add Post to Saved Post
-  app.get("/api/savePost/:postId", (req, res) => {
+  app.get("/api/savePostt/:postId", (req, res) => {
     db.Post.findByPk(req.params.postId)
       .then((dbPost) => {
         if (dbPost !== null) {
@@ -627,63 +632,7 @@ module.exports = (app) => {
   });
 
   app.post(
-    "/api/report/post",
-    [
-      check("reportedFor")
-        .not()
-        .isEmpty()
-        .escape()
-        .withMessage("Validation error, please refresh and try again"),
-      check("reportedPostId")
-        .not()
-        .isEmpty()
-        .escape()
-        .withMessage("Post Id required, please refresh and try again"),
-    ],
-    (req, res) => {
-      if (!req.isAuthenticated()) {
-        return res.status(401).send({ response: "Please sign in" });
-      } else {
-        // Check Post Id if Valid and if post is being reported by Post Author
-        db.Post.findByPk(req.body.postId).then((dbPost) => {
-          if (
-            dbPost === null ||
-            dbPost.dataValues.UserUserId === req.user.userId
-          ) {
-            return res.status(400).send({ response: "Something went wrong, please try again" });
-          } else {
-            db.Complaint.create({
-              reported: "post",
-              reportedFor: req.body.reportedFor,
-              reportedBy: req.user.userId,
-              reportedPostId: req.body.postId,
-            })
-              .then((dbComplaint) => {
-                if (
-                  req.body.blockUser === "true" &&
-                  req.body.blockedUserId.length > 12
-                ) {
-                  db.BlockedUser.create({
-                    blockedUser: req.body.blockedUserId,
-                    blockedByUser: req.user.userId,
-                  }).then((dbBlockedUser) => {
-                    res.json({ response: "Thanks for your input. We will look into this right away." });
-                  });
-                } else {
-                  res.json({ response: "Thanks for your input. We will look into this right away." });
-                }
-              })
-              .catch((err) => {
-                res.json({ response: err });
-              });
-          }
-        });
-      }
-    }
-  );
-
-  app.post(
-    "/api/report/comment",
+    "/api/report",
     [
       check("reportedFor")
         .not()
@@ -698,46 +647,218 @@ module.exports = (app) => {
     ],
     (req, res) => {
       if (!req.isAuthenticated()) {
-        return res.status(401).send({ response: "Please sign in" });
+        return res.status(401).json({ response: "Please sign in" });
       }
 
-      db.Comment.findByPk(req.body.commentId).then((dbComment) => {
-        if (
-          dbComment === null ||
-          dbComment.dataValues.UserUserId === req.user.userId
-        ) {
-          return res.status(400).send({ response: "Something went wrong, please try again" });
-        }
-      });
-
-      db.Complaint.create({
-        reported: "comment",
-        reportedFor: req.body.reportedFor,
-        reportedBy: req.user.userId,
-        reportedCommentId: req.body.commentId,
-      })
-        .then((dbComplaint) => {
+      // Report Comment Section
+      if (req.body.reported === "comment") {
+        db.Comment.findByPk(req.body.reportedId).then((dbComment) => {
           if (
-            req.body.blockUser === "true" &&
-            req.body.blockedUserId.length > 12
+            dbComment === null ||
+            dbComment.dataValues.UserUserId === req.user.userId
           ) {
-            db.BlockedUser.create({
-              blockedUser: req.body.blockedUserId,
-              blockedByUser: req.user.userId,
+            return res
+              .status(400)
+              .send({ response: "Something went wrong, please try again" });
+          }
+        });
+
+        // check if complaint has been made
+        db.Complaint.findOne({
+          where: {
+            reportedBy: req.user.userId,
+            reportedPostId: req.body.reportedId,
+          },
+        }).then((dbComplaint) => {
+          if (dbComplaint === null) {
+            db.Complaint.create({
+              reported: req.body.reported,
+              reportedFor: req.body.reportedFor,
+              reportedBy: req.user.userId,
+              reportedCommentId: req.body.reportedId,
             })
-              .then((dbBlockedUser) => {
-                res.json({ response: true });
+              .then((dbComplaint) => {
+                if (
+                  req.body.blockUser === true &&
+                  req.body.blockedUserId.length > 30
+                ) {
+                  db.BlockedUser.create({
+                    blockedUser: req.body.blockedUserId,
+                    blockedByUser: req.user.userId,
+                  })
+                    .then((dbBlockedUser) => {
+                      res.json({
+                        response:
+                          "Thanks for your input. We will look into this right away.",
+                      });
+                    })
+                    .catch((err) => {
+                      res.json({ response: err });
+                    });
+                } else {
+                  res.json({
+                    response:
+                      "Thanks for your input. We will look into this right away.",
+                  });
+                }
               })
               .catch((err) => {
                 res.json({ response: err });
               });
           } else {
-            res.json({ response: true });
+            res.json({ response: "You have already reported this comment." });
           }
-        })
-        .catch((err) => {
-          res.json({ response: err });
         });
+      }
+
+      // Report Post Section
+      if (req.body.reported === "post") {
+        // Check Post Id if Valid and if post is being reported by Post Author
+        db.Post.findByPk(req.body.reportedId).then((dbPost) => {
+          if (
+            dbPost === null ||
+            dbPost.dataValues.UserUserId === req.user.userId
+          ) {
+            return res
+              .status(400)
+              .send({ response: "Something went wrong, please try again" });
+          } else {
+            if (req.body.blockUser === true) {
+              // Check if Post belong to blocked User ID
+              if (dbPost.dataValues.UserUserId !== req.body.blockedUserId) {
+                return res.json({ response: "Post Author mismatch" });
+              }
+            }
+            // check if complaint has been made
+            db.Complaint.findOne({
+              where: {
+                reportedBy: req.user.userId,
+                reportedPostId: req.body.reportedId,
+              },
+            })
+              .then((dbComplaint) => {
+                if (dbComplaint === null) {
+                  db.Complaint.create({
+                    reported: "post",
+                    reportedFor: req.body.reportedFor,
+                    reportedBy: req.user.userId,
+                    reportedPostId: req.body.reportedId,
+                  })
+                    .then((dbComplaint) => {
+                      if (
+                        req.body.blockUser === true &&
+                        req.body.blockedUserId.length > 30
+                      ) {
+                        db.BlockedUser.create({
+                          blockedUser: req.body.blockedUserId,
+                          blockedByUser: req.user.userId,
+                        }).then((dbBlockedUser) => {
+                          res.json({
+                            response:
+                              "Thanks for your input. We will look into this right away.",
+                          });
+                        });
+                      } else {
+                        res.json({
+                          response:
+                            "Thanks for your input. We will look into this right away.",
+                        });
+                      }
+                    })
+                    .catch((err) => {
+                      return res.json({ response: err });
+                    });
+                } else {
+                  return res.json({
+                    response: "You have already reported this post.",
+                  });
+                }
+              })
+              .catch((err) => {
+                res.json({ response: err });
+              });
+          }
+        });
+      }
     }
   );
+
+  // Find out if liked a comment 
+  app.get('/api/reacted/comment/:commentId/:userId', (req,res)=>{
+    db.Reaction.findOne({
+      where: {
+        CommentCommentId: req.params.commentId,
+        UserUserId: req.params.userId
+      }
+    }).then((dbReaction)=>{
+      if (dbReaction !== null){
+        var response = {
+          like: (dbReaction.dataValues.reaction === "like" ? true : false),
+          dislike: (dbReaction.dataValues.reaction === "dislike" ? true : false),
+        }
+      } else {
+        response = {
+          like: false, dislike: false
+        }
+      }
+      return res.json(response);
+    });
+  });
+
+    // Find out if liked a post 
+  app.get('/api/reacted/post/:postId/:userId', (req,res)=>{
+    db.Reaction.findOne({
+      where: {
+        PostPostId: req.params.postId,
+        UserUserId: req.params.userId
+      }
+    }).then((dbReaction)=>{
+      if (dbReaction !== null){
+        var response = {
+          like: (dbReaction.dataValues.reaction === "like" ? true : false),
+          dislike: (dbReaction.dataValues.reaction === "dislike" ? true : false),
+        }
+      } else {
+        response = {
+          like: false, dislike: false
+        }
+      }
+      return res.json(response);
+    });
+  });
+
+  app.get("/api/savePost/:postId", async (req, res) => { 
+    try{
+      var obj = {};
+      if (!req.params.postId) 
+          throwError(400, 'request error', 'Post `id` request parameter is invalid');
+      await db.Post.findByPk(req.params.postId).then((dbPost)=>{
+              if (dbPost === null){
+                throwError(400, 'request error', 'Post doesnt exist');
+              } else {
+                obj.postId = dbPost.dataValues.postId;
+              }
+            });
+      await db.SavedPost.create({
+        where: {
+          PostPostId: req.params.postId,
+          UserUserId: req.user.userId,
+        },
+      }).then((dbSavedPost) => {
+        obj.savedPostId = dbSavedPost.dataValues.savedPostId;
+        // findorcreate [0] = returnedPost, [1] = true
+      });
+
+      res.status(200).json({type: 'success', data: obj, status: res.status });
+    } catch (error){
+      console.error(error);
+    }
+  });
+
+  throwError = (code, errorType, errorMessage) => error => {
+    if (!error) error = new Error(errorMessage || 'Default Error')
+    error.code = code
+    error.errorType = errorType
+    throw error
+  }
 };

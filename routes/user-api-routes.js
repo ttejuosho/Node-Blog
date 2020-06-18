@@ -111,8 +111,8 @@ module.exports = (app) => {
 
   // Follow a User
   app.get("/api/follow/:username", (req, res) => {
-    if (!req.user) {
-      return res.json({ response: "Please sign in to follow a user" });
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ response: "Please sign in to follow a user" });
     } else {
       db.User.findOne({
         where: {
@@ -139,20 +139,20 @@ module.exports = (app) => {
                         { where: { userId: req.params.username } }
                       );
                       //console.log(dbFollower);
-                      res.json({ response: "Following" });
+                      res.status(200).json({ response: "Following" });
                     })
                     .catch((err) => {
                       res.json(err);
                     });
                 } else {
-                  res.json({ response: "Youre already following this user." });
+                  res.status(200).json({ response: "Youre already following this user." });
                 }
               })
               .catch((err) => {
-                res.json(err);
+                res.status(500).json(err);
               });
           } else {
-            res.json({ response: "User not found" });
+            res.status(200).json({ response: "User not found" });
           }
         })
         .catch((err) => {
@@ -263,6 +263,11 @@ module.exports = (app) => {
       req.params.subscribeTo === "user" ||
       req.params.subscribeTo === "post"
     ) {
+      
+      if(req.body.subscriberEmail === ""){
+        return res.json({ subscriberEmailError: "Please enter an email." });
+      }
+
       var updateObj = {
         subscriberEmail: req.body.subscriberEmail,
       };

@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/ttejuosho/Node-Blog#readme",
   "dependencies": {
+    "async": "^3.2.0",
     "aws-sdk": "^2.673.0",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.19.0",

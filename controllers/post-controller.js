@@ -42,10 +42,186 @@ exports.createNewPost = (req, res) => {
   });
 };
 
+exports.getPost = async (req, res) => {
+  try{
+    var hbsObject = {};
+    await db.Post.findByPk(req.params.postId, {
+      include: [
+        {
+          model: db.User,
+          as: "User",
+          attributes: [
+            "userId",
+            "username",
+            "name",
+            "shortName",
+            "profileImage",
+            "about",
+            "linkedIn",
+            "facebook",
+            "twitter",
+            "github",
+          ],
+        },
+        {
+          model: db.Comment,
+          limit: 5,
+          as: "Comments",
+          attributes: [
+            "commentId",
+            "commentBody",
+            "likesCount",
+            "dislikesCount",
+            "UserUserId",
+            "PostPostId",
+            "createdAt",
+          ],
+          include: [
+            {
+              model: db.User,
+              as: "User",
+              attributes: [
+                "userId",
+                "username",
+                "name",
+                "shortName",
+                "profileImage",
+              ],
+            },
+          ],
+          order: [["createdAt", "DESC"]],
+        },
+      ],
+    }).then((dbPost)=>{
+      if (dbPost !== null) {
+        if (dbPost.dataValues.deleted === true) {
+          return res.render("post/viewPost", {
+            message: "This post has been removed.",
+          });
+        }
+        hbsObject = {
+          postId: dbPost.dataValues.postId,
+          postTitle: dbPost.dataValues.postTitle,
+          postBody: dbPost.dataValues.postBody,
+          postCategory: dbPost.dataValues.postCategory,
+          postDescription: dbPost.dataValues.postDescription,
+          postImage: dbPost.dataValues.postImage,
+          isDraft: dbPost.dataValues.isDraft,
+          published: dbPost.dataValues.published,
+          viewCount: dbPost.dataValues.viewCount,
+          likesCount: dbPost.dataValues.likesCount,
+          dislikesCount: dbPost.dataValues.dislikesCount,
+          postAuthorUserId: dbPost.dataValues.UserUserId,
+          createdAt: dbPost.dataValues.createdAt,
+          postAuthorUsername: dbPost.User.dataValues.username,
+          postAuthorName: dbPost.User.dataValues.name,
+          postAuthorShortName: dbPost.User.dataValues.shortName,
+          postAuthorAbout: dbPost.User.dataValues.about,
+          postAuthorLinkedIn: dbPost.User.dataValues.linkedIn,
+          postAuthorFacebook: dbPost.User.dataValues.facebook,
+          postAuthorTwitter: dbPost.User.dataValues.twitter,
+          postAuthorGithub: dbPost.User.dataValues.github,
+          following: false,
+          saved: false,
+          Comments: [],
+        };
+
+        for (var i = 0; i < dbPost.dataValues.Comments.length; i++) {
+          hbsObject.Comments.push(dbPost.dataValues.Comments[i].dataValues);
+          hbsObject.Comments[i].commentBy =
+            dbPost.dataValues.Comments[i].User.dataValues.name;
+          hbsObject.Comments[i].commentByUserId =
+            dbPost.dataValues.Comments[i].User.dataValues.userId;
+          hbsObject.Comments[i].commentByUserProfileImage =
+            dbPost.dataValues.Comments[i].User.dataValues.profileImage;
+          hbsObject.Comments[i].likedByUser = false;
+        }
+      }
+    });
+
+    //When not signed in or another user is viewing post, ViewCount increment
+    if (
+      !req.isAuthenticated() ||
+      res.locals.userId !== hbsObject.postAuthorUserId.UserUserId
+    ) {
+      await db.Post.increment(
+        { viewCount: 1 },
+        { where: { postId: req.params.postId } }
+      );
+    }
+
+    if (req.isAuthenticated()){
+      await db.Follower.findOne({
+        where: {
+          followedUserUsername: hbsObject.postAuthorUsername,
+          UserUserId: req.user.userId,
+        },
+      }).then((dbFollower) => {
+        if (dbFollower !== null) {
+          hbsObject.following = true;
+        }
+      });
+
+      await db.SavedPost.findOne({
+        where: {
+          PostPostId: req.params.postId,
+          UserUserId: req.user.userId,
+        },
+      }).then((dbSavedPost) => {
+        if (dbSavedPost !== null) {
+          hbsObject.saved = true;
+          hbsObject.savedPostId = dbSavedPost.dataValues.savedPostId;
+        }
+        //return res.render("post/viewPost", hbsObject);
+      });
+      
+      // Check if User Liked the Post
+      await db.Reaction.findOne({
+        where: {
+          PostPostId: req.params.postId,
+          UserUserId: req.user.userId
+        }
+      }).then((dbReaction)=>{
+        if (dbReaction !== null && dbReaction.dataValues.reaction === "like"){
+          hbsObject.likedByUser = true;
+        }
+
+        if (dbReaction !== null && dbReaction.dataValues.reaction === "dislike"){
+          hbsObject.dislikedByUser = true;
+        }
+      })
+
+      for (var u = 0; u < hbsObject.Comments.length; u++){
+        await db.Reaction.findOne({
+          where: {
+            CommentCommentId: hbsObject.Comments[u].commentId,
+            UserUserId: req.user.userId
+          }
+        }).then((dbReaction)=>{
+          if (dbReaction !== null && dbReaction.dataValues.reaction === "like"){
+            hbsObject.Comments[u].likedByUser = true;
+          }
+        })
+      }
+    }
+    //console.log(hbsObject);
+    return res.render("post/viewPost", hbsObject);
+  }
+  catch(error){
+    console.error(error);
+  }
+}
+
+
+
+
+
+
+
 // Get a Post
-exports.getPost = (req, res) => {
+exports.getPostt = async (req, res) => {
   var hbsObject = {};
-  db.Post.findByPk(req.params.postId, {
+  await db.Post.findByPk(req.params.postId, {
     include: [
       {
         model: db.User,
@@ -135,11 +311,35 @@ exports.getPost = (req, res) => {
             dbPost.dataValues.Comments[i].User.dataValues.userId;
           hbsObject.Comments[i].commentByUserProfileImage =
             dbPost.dataValues.Comments[i].User.dataValues.profileImage;
+            //hbsObject.Comments[i].likedByUser = false;
+        }
+
+        if(req.isAuthenticated()){
+          for (var j = 0; j < dbPost.dataValues.Comments.length; j++){
+            var flagg = false;
+              db.Reaction.findOne({
+                where: {
+                  CommentCommentId: dbPost.dataValues.Comments[j].commentId,
+                  UserUserId: req.user.userId
+                }
+              }).then((dbReaction)=>{
+                if (dbReaction !== null){
+                  if (dbReaction.dataValues.reaction === "like" ){
+                    flagg = true;
+                  }
+                }
+              })
+
+              if(flagg === true){
+                hbsObject.Comments[j].likedByUser = true;
+              }
+              
+          }
         }
 
         //When not signed in or another user is viewing post, ViewCount increment
         if (
-          !req.isAuthenticated ||
+          !req.isAuthenticated() ||
           res.locals.userId !== dbPost.dataValues.UserUserId
         ) {
           db.Post.increment(
@@ -182,9 +382,10 @@ exports.getPost = (req, res) => {
               hbsObject.saved = true;
               hbsObject.savedPostId = dbSavedPost.dataValues.savedPostId;
             }
-            //console.log(hbsObject);
+            console.log(hbsObject);
             return res.render("post/viewPost", hbsObject);
           });
+
         } else {
           return res.render("post/viewPost", hbsObject);
         }
@@ -432,6 +633,7 @@ exports.getReactions = (req, res) => {
 
 // [Post] new Comment
 exports.commentOnPost = (req, res) => {
+  if(req.isAuthenticated()){
   db.Post.findByPk(req.params.postId)
     .then((dbPost) => {
       if (dbPost !== null && dbPost.dataValues.published === true) {
@@ -451,6 +653,9 @@ exports.commentOnPost = (req, res) => {
     .catch((err) => {
       res.render("error", { error: err });
     });
+  } else {
+    res.render("error", { error: "Please sign in" });
+  }
 };
 
 // [Get] all recently viewed posts
