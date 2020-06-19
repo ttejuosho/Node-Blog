@@ -1,19 +1,17 @@
 <div class="container">
-
   <div class="nav-scroller py-1 mb-2">
     <nav class="nav d-flex justify-content-between">
-      <a class="p-2 text-muted" href="#">World</a>
-      <a class="p-2 text-muted" href="#">U.S.</a>
-      <a class="p-2 text-muted" href="#">Technology</a>
-      <a class="p-2 text-muted" href="#">Design</a>
-      <a class="p-2 text-muted" href="#">Culture</a>
-      <a class="p-2 text-muted" href="#">Business</a>
-      <a class="p-2 text-muted" href="#">Politics</a>
-      <a class="p-2 text-muted" href="#">Opinion</a>
-      <a class="p-2 text-muted" href="#">Science</a>
-      <a class="p-2 text-muted" href="#">Health</a>
-      <a class="p-2 text-muted" href="#">Style</a>
-      <a class="p-2 text-muted" href="#">Travel</a>
+      <a class="p-2 text-muted" href="/c/world">World</a>
+      <a class="p-2 text-muted" href="/c/technology">Technology</a>
+      <a class="p-2 text-muted" href="/c/design">Design</a>
+      <a class="p-2 text-muted" href="/c/culture">Culture</a>
+      <a class="p-2 text-muted" href="/c/business">Business</a>
+      <a class="p-2 text-muted" href="/c/politics">Politics</a>
+      <a class="p-2 text-muted" href="/c/opinion">Opinion</a>
+      <a class="p-2 text-muted" href="/c/science">Science</a>
+      <a class="p-2 text-muted" href="/c/health">Health</a>
+      <a class="p-2 text-muted" href="/c/style">Style</a>
+      <a class="p-2 text-muted" href="/c/travel">Travel</a>
     </nav>
   </div>
 
@@ -24,6 +22,27 @@
       <p class="lead mb-0"><a href="#" class="text-white font-weight-bold">Continue reading...</a></p>
     </div>
   </div>
+
+{{#if categoryView}}
+  {{#each posts}}
+    <div class="row mb-2">
+      <div class="col-md-12">
+        <div
+          class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+          <div class="col p-4 d-flex flex-column position-static">
+            <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
+            <h3 class="mb-0"><a href="/post/{{postId}}" class="text-dark">{{postTitle}}</a></h3>
+            <p class="card-text mb-auto">{{postDescription}}</p>
+            <small class="form-text text-muted mb-2">Viewed {{viewCount}} times</small>
+          </div>
+          <div class="col-auto d-none d-lg-block">
+            <img src="{{postImage}}" style="height: 250px; width: 350px;" />
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+{{/if}}
 
   <div class="row mb-2">
     <div class="col-md-6">

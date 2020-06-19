@@ -47,6 +47,25 @@
         </p>
 
       </div><!-- /.blog-post -->
+
+      <div class="blog-post mb-4" id="subscribeSection">
+        <h4>Subscribe to more posts from {{postAuthorShortName}}</h4>
+        <form class="form-inline" novalidate>
+          <label class="sr-only" for="subscriberEmail">Email Address</label>
+          <input type="email" class="form-control mb-2 mr-sm-2 w-50" name="subscriberEmail" id="subscriberEmail" placeholder="Email address" required>
+          {{#if errors}}
+          {{#each errors}}
+          {{#ifEquals param "subscriberEmail"}}
+          <div id="subscriberEmailError" class="messages text-danger font-weight-bold">{{msg}}</div>
+          {{/ifEquals}}
+          {{/each}}
+          {{/if}}
+          <button type="button" class="btn btn-secondary mb-2"
+            onclick="subscribeToUser(`{{postAuthorUserId}}`)">Subscribe</button>
+        </form>
+        <p id="subscriberEmailError" class="messages text-danger font-weight-bold"></p>
+      </div><!-- /.blog-post -->
+
       <p class="text-danger postActionResponse"></p>
       <h4>Comments</h4>
       <div id="commentSection" class="blog-post mb-4">
@@ -119,23 +138,6 @@
         <p class="mt-3" id="showNewCommentBox"><button class="btn btn-outline-dark btn-block">Comment on this post</button></p>
       </div>
 
-      <div class="blog-post" id="subscribeSection">
-        <h4>Subscribe to more posts from {{postAuthorShortName}}</h4>
-        <form class="form-inline" novalidate>
-          <label class="sr-only" for="subscriberEmail">Email Address</label>
-          <input type="email" class="form-control mb-2 mr-sm-2 w-50" name="subscriberEmail" id="subscriberEmail" placeholder="Email address" required>
-          {{#if errors}}
-          {{#each errors}}
-          {{#ifEquals param "subscriberEmail"}}
-          <div id="subscriberEmailError" class="messages text-danger font-weight-bold">{{msg}}</div>
-          {{/ifEquals}}
-          {{/each}}
-          {{/if}}
-          <button type="button" class="btn btn-secondary mb-2"
-            onclick="subscribeToUser(`{{postAuthorUserId}}`)">Subscribe</button>
-        </form>
-        <p id="subscriberEmailError" class="messages text-danger font-weight-bold"></p>
-      </div><!-- /.blog-post -->
       {{/if}}
     </div><!-- /.blog-main -->
 
@@ -215,7 +217,6 @@
 
   </div><!-- /.row -->
 
-  
 
 
   {{!-- Start Report Modal --}}
@@ -294,46 +295,6 @@
   </div>
   {{!-- End Report Modal --}}
 
-          {{!-- Begin of Social Media Section --}}
-        {{!-- <div id="SocialMediaSection" class="tab-pane fade" role="tabpanel" aria-labelledby="SocialMedia-tab"> --}}
-            <div class="card" id="SocialMediaSection">
-                <div class="card-header pt-3">
-                    <h2><i class="tim-icons icon-attach-87 mr-2 mb-1"></i>Share via Social Media</h2>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Message</label>
-                                <textarea id="socialMessage" name="socialMessage" type="text"
-                                    class="form-control form-control-sm mb-1" onkeyup="SetNewSize(this);"
-                                    style="overflow-y: hidden; height: 59px; min-height: 5em; max-height: 50vh; width: 100%;">Please take a moment to read my post on Bloget</textarea>
-                            </div>
-                        </div>
-                    </div>
-                    {{!-- <ul>
-                        <li class="social-share facebook"><img src="facebook-icon.png" alt="Share Page on Facebook" />Facebook</li>
-                        <li class="social-share twitter"><img src="twitter-icon.png" alt="Share Page on Twitter" />Twitter</li>
-                        <li class="social-share linkedin"><img src="linkedin-icon.png" alt="Share Page on LinkedIn" />LinkedIn</li>
-                    </ul> --}}
-                    <div class="button-container">
-                        <button class="btn btn-icon btn-round btn-facebook social-share facebook"
-                            style="height: 3rem;width: 3rem;">
-                            <i class="fab fa-facebook"></i>
-                        </button>
-                        <button class="btn btn-icon btn-round btn-twitter social-share twitter"
-                            style="height: 3rem;width: 3rem;">
-                            <i class="fab fa-twitter"></i>
-                        </button>
-                        <button class="btn btn-icon btn-round btn-linkedin social-share linkedin"
-                            style="height: 3rem;width: 3rem;">
-                            <i class="fab fa-linkedin"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        {{!-- </div> --}}
-        {{!-- End of Social Media Section --}}
 </main>
 
 <script type="text/javascript">
