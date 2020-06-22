@@ -8,6 +8,7 @@ const operatorsAliases = {
   $or: Op.or,
 };
 const moment = require("moment");
+const postCategory = require("../models/post-category");
 
 module.exports = (app) => {
   // Get all Posts by a User
@@ -61,6 +62,10 @@ module.exports = (app) => {
             "twitter",
             "github",
           ],
+        },
+        {
+          model: db.PostCategory,
+          attributes: ["postCategory"]
         },
         {
           model: db.Comment,
@@ -393,86 +398,74 @@ module.exports = (app) => {
   });
 
   app.post("/api/post/newcomment/:postId", (req, res) => {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ response: "Please sign in to post a comment" });
-      } else {
-        if (req.body.commentBody.trim().length > 2) {
-          db.Post.findByPk(req.params.postId).then((dbPost) => {
+    if (!req.isAuthenticated()) {
+      return res
+        .status(401)
+        .json({ response: "Please sign in to post a comment" });
+    } else {
+      if (req.body.commentBody.trim().length > 2) {
+        db.Post.findByPk(req.params.postId)
+          .then((dbPost) => {
             if (dbPost !== null && dbPost.dataValues.published === true) {
               db.Comment.create({
                 commentBody: req.body.commentBody,
                 PostPostId: req.params.postId,
                 UserUserId: req.user.userId,
-              }).then((dbComment) => {
-                db.Comment.findByPk(dbComment.dataValues.commentId, {
-                  include: [
-                    {
-                      model: db.User,
-                      as: "User",
-                      attributes: ["profileImage", "userId", "name"],
-                    },
-                  ],
-                }).then((data) => {
-                  res.json(data);
-                }).catch((err) => {
+              })
+                .then((dbComment) => {
+                  db.Comment.findByPk(dbComment.dataValues.commentId, {
+                    include: [
+                      {
+                        model: db.User,
+                        as: "User",
+                        attributes: ["profileImage", "userId", "name"],
+                      },
+                    ],
+                  })
+                    .then((data) => {
+                      res.json(data);
+                    })
+                    .catch((err) => {
+                      res.json({ response: err });
+                    });
+                })
+                .catch((err) => {
                   res.json({ response: err });
                 });
-              }).catch((err) => {
-                res.json({ response: err });
-              });
             } else {
-              return res.status(400).json({ response: "Something isnt right with this post."})
+              return res
+                .status(400)
+                .json({ response: "Something isnt right with this post." });
             }
-          }).catch((err) => {
+          })
+          .catch((err) => {
             res.json({ response: err });
           });
-        } else {
-          return res.json({ response: "Comment length is too short." });
-        }
+      } else {
+        return res.json({ response: "Comment length is too short." });
       }
+    }
   });
 
   app.get("/api/post/byTime/:startDate/:endDate", (req, res) => {
     var startDate = new Date(req.params.startDate);
     var endDate = new Date(req.params.endDate);
-
-    // startDate = new Date(startDate.getFullYear()
-    //                     ,startDate.getMonth()
-    //                     ,startDate.getDate()
-    //                     ,00,01,00);
-
-    // endDate = new Date(endDate.getFullYear()
-    //                   ,endDate.getMonth()
-    //                   ,endDate.getDate()
-    //                   ,23,59,59);
-
     const ACCEPT_FORMAT = "YYYY-MM-DD hh:mm:ss";
     const start_date = req.params.startDate;
     const end_date = req.params.endDate;
     const start = moment.utc(start_date, ACCEPT_FORMAT);
     const end = moment.utc(end_date, ACCEPT_FORMAT);
-    console.log(start);
-    console.log(end);
 
     var local = moment(start).local().format("YYYY-MM-DD HH:mm:ss");
 
-    //console.log(startDate, endDate);
-    console.log(local);
+    console.log("From: ", start, " to ", end);
+    console.log("LOCAL:", local);
 
     db.Post.findAll({
       where: {
         createdAt: {
           [Op.between]: [start, end],
         },
-        //   [Op.or]: [{
-        //     createdAt: {
-        //         [Op.between]: [startDate, endDate]
-        //     }
-        // }, {
-        //     createdAt: {
-        //         [Op.between]: [startDate, endDate]
-        //     }
-        // }]
       },
     })
       .then((dbPosts) => {
@@ -494,6 +487,7 @@ module.exports = (app) => {
       where: {
         postCategory: req.params.category,
       },
+      order: [["viewCount", "DESC"]],
     }).then((dbPosts) => {
       res.json(dbPosts);
     });
@@ -783,62 +777,68 @@ module.exports = (app) => {
     }
   );
 
-  // Find out if liked a comment 
-  app.get('/api/reacted/comment/:commentId/:userId', (req,res)=>{
+  // Find out if liked a comment
+  app.get("/api/reacted/comment/:commentId/:userId", (req, res) => {
     db.Reaction.findOne({
       where: {
         CommentCommentId: req.params.commentId,
-        UserUserId: req.params.userId
-      }
-    }).then((dbReaction)=>{
-      if (dbReaction !== null){
+        UserUserId: req.params.userId,
+      },
+    }).then((dbReaction) => {
+      if (dbReaction !== null) {
         var response = {
-          like: (dbReaction.dataValues.reaction === "like" ? true : false),
-          dislike: (dbReaction.dataValues.reaction === "dislike" ? true : false),
-        }
+          like: dbReaction.dataValues.reaction === "like" ? true : false,
+          dislike: dbReaction.dataValues.reaction === "dislike" ? true : false,
+        };
       } else {
         response = {
-          like: false, dislike: false
-        }
+          like: false,
+          dislike: false,
+        };
       }
       return res.json(response);
     });
   });
 
-    // Find out if liked a post 
-  app.get('/api/reacted/post/:postId/:userId', (req,res)=>{
+  // Find out if liked a post
+  app.get("/api/reacted/post/:postId/:userId", (req, res) => {
     db.Reaction.findOne({
       where: {
         PostPostId: req.params.postId,
-        UserUserId: req.params.userId
-      }
-    }).then((dbReaction)=>{
-      if (dbReaction !== null){
+        UserUserId: req.params.userId,
+      },
+    }).then((dbReaction) => {
+      if (dbReaction !== null) {
         var response = {
-          like: (dbReaction.dataValues.reaction === "like" ? true : false),
-          dislike: (dbReaction.dataValues.reaction === "dislike" ? true : false),
-        }
+          like: dbReaction.dataValues.reaction === "like" ? true : false,
+          dislike: dbReaction.dataValues.reaction === "dislike" ? true : false,
+        };
       } else {
         response = {
-          like: false, dislike: false
-        }
+          like: false,
+          dislike: false,
+        };
       }
       return res.json(response);
     });
   });
 
-  app.get("/api/savePost/:postId", async (req, res) => { 
-    try{
+  app.get("/api/savePost/:postId", async (req, res) => {
+    try {
       var obj = {};
-      if (!req.params.postId) 
-          throwError(400, 'request error', 'Post `id` request parameter is invalid');
-      await db.Post.findByPk(req.params.postId).then((dbPost)=>{
-              if (dbPost === null){
-                throwError(400, 'request error', 'Post doesnt exist');
-              } else {
-                obj.postId = dbPost.dataValues.postId;
-              }
-            });
+      if (!req.params.postId)
+        throwError(
+          400,
+          "request error",
+          "Post `id` request parameter is invalid"
+        );
+      await db.Post.findByPk(req.params.postId).then((dbPost) => {
+        if (dbPost === null) {
+          throwError(400, "request error", "Post doesnt exist");
+        } else {
+          obj.postId = dbPost.dataValues.postId;
+        }
+      });
       await db.SavedPost.create({
         where: {
           PostPostId: req.params.postId,
@@ -849,16 +849,58 @@ module.exports = (app) => {
         // findorcreate [0] = returnedPost, [1] = true
       });
 
-      res.status(200).json({type: 'success', data: obj, status: res.status });
-    } catch (error){
+      res.status(200).json({ type: "success", data: obj, status: res.status });
+    } catch (error) {
       console.error(error);
     }
   });
 
-  throwError = (code, errorType, errorMessage) => error => {
-    if (!error) error = new Error(errorMessage || 'Default Error')
-    error.code = code
-    error.errorType = errorType
-    throw error
-  }
+  throwError = (code, errorType, errorMessage) => (error) => {
+    if (!error) error = new Error(errorMessage || "Default Error");
+    error.code = code;
+    error.errorType = errorType;
+    throw error;
+  };
+
+  app.get("/api/getPostCategories", (req, res) => {
+    db.PostCategory.findAll()
+      .then((dbPostCategory) => {
+        res.json(dbPostCategory);
+      })
+      .catch((error) => {
+        res.json(error);
+      });
+  });
+
+  app.get("/api/savePostCategory/:postCategory", (req, res) => {
+    db.PostCategory.findOne({
+      where: { postCategory: req.params.postCategory },
+    }).then((dbPostCategory) => {
+      if (dbPostCategory === null) {
+        db.PostCategory.create({ postCategory: req.params.postCategory })
+          .then((dbPostCategory) => {
+            res.json(dbPostCategory);
+          })
+          .catch((error) => {
+            res.json(error);
+          });
+      } else {
+        res.json( { response: req.params.postCategory + " already exist in the db" });
+      }
+    });
+  });
+
+  app.post("/api/savePostCategories", (req, res) => {
+    var created = [];
+    req.body.forEach((postCategory) => {
+      db.PostCategory.create(postCategory)
+        .then((dbPostCategory) => {
+          created.push(dbPostCategory);
+        })
+        .catch((error) => {
+          res.json(error);
+        });
+    })
+    res.json(created);
+  });
 };
