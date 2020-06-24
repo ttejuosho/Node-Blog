@@ -14,7 +14,7 @@ module.exports = function(app) {
 
     app.get('/post/:postId', postController.getPost);
 
-    app.get('/post/edit/:postId', postController.getEditPost);
+    app.get('/post/edit/:postId', Security.isLoggedIn, postController.getEditPost);
     app.post('/post/edit/:postId', postController.updatePost);
 
     app.get('/post/delete/:postId', postController.deletePost);

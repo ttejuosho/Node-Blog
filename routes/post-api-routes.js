@@ -873,6 +873,7 @@ module.exports = (app) => {
   });
 
   app.get("/api/savePostCategory/:postCategory", (req, res) => {
+    if (req.params.postCategory.length > 1){
     db.PostCategory.findOne({
       where: { postCategory: req.params.postCategory },
     }).then((dbPostCategory) => {
@@ -888,6 +889,9 @@ module.exports = (app) => {
         res.json( { response: req.params.postCategory + " already exist in the db" });
       }
     });
+  } else {
+    res.json( { response: "Invalid post category passed." });
+  }
   });
 
   app.post("/api/savePostCategories", (req, res) => {

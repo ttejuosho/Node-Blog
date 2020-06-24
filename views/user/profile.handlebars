@@ -84,9 +84,7 @@
 
   {{#if isOwner}}
   <div id="drafts" class="tab-pane fade" role="tabpanel" aria-labelledby="drafts-tab">
-    {{#unless Posts}} <p> Nothing in the works yet. </p>
-    <p><a href="/newPost">Click here to start writing</a></p>{{/unless}}
-    {{#each Posts}} {{#if isDraft}}
+    {{#each Posts}}  {{#if isDraft}}
     <div class="row mb-2">
       <div class="col-md-12">
         <div
@@ -99,11 +97,11 @@
             <p class="mb-0">
               <span class="mr-3"> <a class="text-success" href="/post/{{postId}}"><i
                     class="fas fa-binoculars fa-2x"></i></a></span>
-              <span class="mr-3"> <a class="text-info" onclick="openPublishPostModal(`{{postId}}`)"><i
+              <span class="mr-3 pointer"> <a class="text-info" onclick="openPublishPostModal(`{{postId}}`)"><i
                     class="fas fa-upload fa-2x"></i></a></span>
               <span class="mr-3"> <a class="text-secondary" href="/post/edit/{{postId}}"><i
                     class="fas fa-edit fa-2x"></i></a></span>
-              <span class="mr-1"> <a class="text-danger" onclick="openDeletePostModal(`{{postId}}`)"><i
+              <span class="mr-1 pointer"> <a class="text-danger" onclick="openDeletePostModal(`{{postId}}`)"><i
                     class="fas fa-trash-alt fa-2x"></i></a></span>
             </p>
           </div>
@@ -115,6 +113,9 @@
     </div>
     {{/if}}
     {{/each}}
+    {{#unless Posts}} <p> Nothing in the works yet. </p>
+    <p><a href="/newPost">Click here to start writing</a></p>
+    {{/unless}}
   </div>
   {{/if}}
 
@@ -144,9 +145,9 @@
   </div>
 </div>
 
-<div class="modal fade" id="confirmDeletePostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+<div class="modal blurModalBg" id="confirmDeletePostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
   role="dialog" aria-labelledby="deletePostModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title font-weight-bold text-danger" id="deletePostModalLabel"><i
@@ -163,9 +164,9 @@
   </div>
 </div>
 
-<div class="modal fade" id="confirmPublishPostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+<div class="modal blurModalBg" id="confirmPublishPostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
   role="dialog" aria-labelledby="publishPostModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title font-weight-bold" id="publishPostModalLabel"><i
@@ -184,7 +185,7 @@
 
 <div class="modal blurModalBg" id="confirmUnpublishPostModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
   role="dialog" aria-labelledby="unpublishPostModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title font-weight-bold" id="unpublishPostModalLabel"><i
@@ -195,7 +196,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
-        <a type="button" class="btn btn-outline-secondary" id="unpublishPostBtn">Delete</a>
+        <a type="button" class="btn btn-outline-secondary" id="unpublishPostBtn">Unpublish</a>
       </div>
     </div>
   </div>

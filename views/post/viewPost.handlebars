@@ -28,11 +28,11 @@
           {{/unless}}
           <span id="thumbsUp" class="mr-2 pointer" data-toggle="tooltip" data-placement="bottom" title="Like post"
             onclick="reactTo(`post`,`like`, `{{postId}}`)">
-          {{#if likedByUser}}
+            {{#if likedByUser}}
             <i class="fas fa-thumbs-up fa-2x mr-2"></i>
-          {{else}}
+            {{else}}
             <i class="far fa-thumbs-up fa-2x mr-2"></i>
-          {{/if}}
+            {{/if}}
             <small class="likesCount text-success">{{likesCount}}</small>
           </span>
           <span id="thumbsDown" class="pointer" data-toggle="tooltip" data-placement="bottom" title="Dislike post"
@@ -52,7 +52,8 @@
         <h4>Subscribe to more posts from {{postAuthorShortName}}</h4>
         <form class="form-inline" novalidate>
           <label class="sr-only" for="subscriberEmail">Email Address</label>
-          <input type="email" class="form-control mb-2 mr-sm-2 w-50" name="subscriberEmail" id="subscriberEmail" placeholder="Email address" required>
+          <input type="email" class="form-control mb-2 mr-sm-2 w-50" name="subscriberEmail" id="subscriberEmail"
+            placeholder="Email address" required>
           {{#if errors}}
           {{#each errors}}
           {{#ifEquals param "subscriberEmail"}}
@@ -71,7 +72,7 @@
       <div id="commentSection" class="blog-post mb-4">
 
         {{#unless Comments}}
-          <p>No user has commented on this post for now.</p>
+        <p>No user has commented on this post for now.</p>
         {{/unless}}
         {{#each Comments}}
         <div class="card mb-2">
@@ -96,18 +97,18 @@
               <span id="commentThumbsUp" class="pointer" data-toggle="tooltip" data-placement="bottom" title="vote up"
                 onclick="reactTo(`{{counter @index}}`,`comment`,`like`, `{{commentId}}`)">
                 {{#if likedByUser}}
-                  <i id="thumbsUp{{counter @index}}" class="fas fa-thumbs-up mr-2"></i>
+                <i id="thumbsUp{{counter @index}}" class="fas fa-thumbs-up mr-2"></i>
                 {{else}}
-                  <i id="thumbsUp{{counter @index}}" class="far fa-thumbs-up mr-2"></i>
+                <i id="thumbsUp{{counter @index}}" class="far fa-thumbs-up mr-2"></i>
                 {{/if}}
                 <small class="commentLikesCount text-success mr-2">{{likesCount}}</small>
               </span>
               <span id="commentThumbsDown" class="pointer" data-toggle="tooltip" data-placement="bottom"
                 title="vote down" onclick="reactTo(`{{counter @index}}`,`comment`,`dislike`, `{{commentId}}`)">
                 {{#if dislikedByUser}}
-                  <i id="thumbsDown{{counter @index}}" class="fas fa-thumbs-down mr-2"></i>
+                <i id="thumbsDown{{counter @index}}" class="fas fa-thumbs-down mr-2"></i>
                 {{else}}
-                  <i id="thumbsDown{{counter @index}}" class="far fa-thumbs-down mr-2"></i>
+                <i id="thumbsDown{{counter @index}}" class="far fa-thumbs-down mr-2"></i>
                 {{/if}}
                 <small class="commentDislikesCount text-danger mr-2">{{dislikesCount}}</small>
               </span>
@@ -128,14 +129,17 @@
             <textarea class="ml-1 mr-1 w-100" name="commentBody" id="commentBody" rows="4"></textarea>
             <p class="pl-1 text-danger btn-block mb-0" id="commentsBoxErrors"></p>
             <p class="float-right mt-3 pl-1">
-              <button type="button" class="btn btn-sm btn-outline-dark mr-2" onclick="postComment(`{{postId}}`)">Comment</button>
+              <button type="button" class="btn btn-sm btn-outline-dark mr-2"
+                onclick="postComment(`{{postId}}`)">Comment</button>
               <button type="button" id="hideNewCommentBox" class="btn btn-sm btn-outline-danger">Cancel</button>
             </p>
           </form>
         </div>
         <p class="text-danger d-none commentSignin">You have to be signed in to comment on a post</p>
-        <p class="mt-3 d-none commentSignin"><a type="button" href="/signin" class="btn btn-outline-dark btn-block">Click here to sign in</a></p>
-        <p class="mt-3" id="showNewCommentBox"><button class="btn btn-outline-dark btn-block">Comment on this post</button></p>
+        <p class="mt-3 d-none commentSignin"><a type="button" href="/signin"
+            class="btn btn-outline-dark btn-block">Click here to sign in</a></p>
+        <p class="mt-3" id="showNewCommentBox"><button class="btn btn-outline-dark btn-block">Comment on this
+            post</button></p>
       </div>
 
       {{/if}}
@@ -156,40 +160,36 @@
       <div class="p-4 mb-3 bg-light rounded">
         <h4 class="font-italic">Share Post</h4>
         <div class="button-container">
-            <button class="btn btn-icon btn-round btn-facebook social-share facebook"
-                style="height: 3rem;width: 3rem;">
-                <i class="fab fa-facebook fa-2x"></i>
-            </button>
-            <button class="btn btn-icon btn-round btn-twitter social-share twitter"
-                style="height: 3rem;width: 3rem;">
-                <i class="fab fa-twitter fa-2x"></i>
-            </button>
-            <button class="btn btn-icon btn-round btn-linkedin social-share linkedin"
-                style="height: 3rem;width: 3rem;">
-                <i class="fab fa-linkedin fa-2x"></i>
-            </button>
+          <button class="btn btn-icon btn-round btn-facebook social-share facebook" style="height: 3rem;width: 3rem;">
+            <i class="fab fa-facebook fa-2x"></i>
+          </button>
+          <button class="btn btn-icon btn-round btn-twitter social-share twitter" style="height: 3rem;width: 3rem;">
+            <i class="fab fa-twitter fa-2x"></i>
+          </button>
+          <button class="btn btn-icon btn-round btn-linkedin social-share linkedin" style="height: 3rem;width: 3rem;">
+            <i class="fab fa-linkedin fa-2x"></i>
+          </button>
         </div>
       </div>
 
-
-      <div class="p-4">
-        <h4 class="font-italic">Archives</h4>
-        <ol class="list-unstyled mb-0">
-          <li><a href="#">March 2014</a></li>
-          <li><a href="#">February 2014</a></li>
-          <li><a href="#">January 2014</a></li>
-          <li><a href="#">December 2013</a></li>
-          <li><a href="#">November 2013</a></li>
-          <li><a href="#">October 2013</a></li>
-          <li><a href="#">September 2013</a></li>
-          <li><a href="#">August 2013</a></li>
-          <li><a href="#">July 2013</a></li>
-          <li><a href="#">June 2013</a></li>
-          <li><a href="#">May 2013</a></li>
-          <li><a href="#">April 2013</a></li>
-        </ol>
+    {{#unless SimilarPosts}}
+      <div class="px-4 pt-4 pb-1 bg-light rounded">
+        <h4 class="font-italic ">Similar Posts</h4>
       </div>
-
+      <div class="px-4 pb-4 bg-light rounded">
+        {{#each SimilarPosts}}
+        <div class="row border-top">
+          <div class="col-7 py-3">
+            <p><a class="text-dark font-weight-bolder" href="/post/{{similarPostId}}">{{similarPostTitle}}</a> </p>
+            <p class="mb-0">By: <a class="text-dark"
+                href="/@{{similarPostAuthorUsername}}">{{similarPostAuthorName}}</a> </p>
+          </div>
+          <div class="col-5 px-0"><img class="w-100" src="{{similarPostImage}}" /> </div>
+        </div>
+        {{/each}}
+      </div>
+    {{/unless}}
+    
       <div class="p-4">
         <h4 class="font-italic">Find {{postAuthorShortName}} elsewhere</h4>
         <p class="mt-2">
@@ -402,8 +402,8 @@
             console.log("Error");
             $('#commentsBoxErrors').text(data.response);
             return;
-          } 
-            var html = `<div class="card mb-2">
+          }
+          var html = `<div class="card mb-2">
             <div class="card-body">
                 <div class="row">
                   <div class="col-2 pr-0">
@@ -430,10 +430,10 @@
               </div>
             </div>`;
 
-            $('#commentSection').prepend(html);
-            $('#newCommentBox').addClass('d-none');
-            $('#showNewCommentBox').removeClass('d-none');
-      
+          $('#commentSection').prepend(html);
+          $('#newCommentBox').addClass('d-none');
+          $('#showNewCommentBox').removeClass('d-none');
+
 
         }).catch((err) => {
           console.error(err);
@@ -453,12 +453,12 @@
       }
     ).then(response => response.json())
       .then((data) => {
-        if (data.subscriberEmailError){
+        if (data.subscriberEmailError) {
           $('#subscriberEmailError').text('Please enter an email');
         } else {
           $('#subscribeSection').html('<h5 class="text-danger">' + data.response + '</h5>');
         }
-        
+
       }).catch((error) => {
         console.error('Error:', error);
       });
@@ -468,7 +468,7 @@
     $('#reportModal').modal({
       backdrop: false
     });
-    if(reported === "comment"){
+    if (reported === "comment") {
       $("#reportModalTitle").text("Report Comment");
     } else {
       $("#reportModalTitle").text("Report Post");
@@ -520,43 +520,43 @@
       });
   }
 
-      function SetNewSize(textarea) {
-        textarea.style.height = "0px";
-        textarea.style.height = textarea.scrollHeight + "px";
-    }
+  function SetNewSize(textarea) {
+    textarea.style.height = "0px";
+    textarea.style.height = textarea.scrollHeight + "px";
+  }
 
-    setShareLinks();
+  setShareLinks();
 
-    function socialWindow(url) {
-        var left = (screen.width - 570) / 2;
-        var top = (screen.height - 570) / 2;
-        var params = "menubar=no,toolbar=no,status=no,width=570,height=570,top=" + top + ",left=" + left;
-        // Setting 'params' to an empty string will launch
-        // content in a new tab or window rather than a pop-up.
-        // params = "";
-        window.open(url, "NewWindow", params);
-    }
+  function socialWindow(url) {
+    var left = (screen.width - 570) / 2;
+    var top = (screen.height - 570) / 2;
+    var params = "menubar=no,toolbar=no,status=no,width=570,height=570,top=" + top + ",left=" + left;
+    // Setting 'params' to an empty string will launch
+    // content in a new tab or window rather than a pop-up.
+    // params = "";
+    window.open(url, "NewWindow", params);
+  }
 
-    function setShareLinks() {
-        var postUrl = "http://bloget.herokuapp.com/post/" + $('#postId').val() + "/v2";
-        var pageUrl = encodeURIComponent(postUrl);
-        //var tweet = encodeURIComponent($('meta[name="description"]').attr("content"));
-        var tweet = encodeURIComponent($('#socialMessage').val());
+  function setShareLinks() {
+    var postUrl = "http://bloget.herokuapp.com/post/" + $('#postId').val() + "/v2";
+    var pageUrl = encodeURIComponent(postUrl);
+    //var tweet = encodeURIComponent($('meta[name="description"]').attr("content"));
+    var tweet = encodeURIComponent($('#socialMessage').val());
 
-        $(".social-share.facebook").on("click", function () {
-            url = "https://www.facebook.com/sharer.php?u=" + pageUrl;
-            socialWindow(url);
-        });
+    $(".social-share.facebook").on("click", function () {
+      url = "https://www.facebook.com/sharer.php?u=" + pageUrl;
+      socialWindow(url);
+    });
 
-        $(".social-share.twitter").on("click", function () {
-            url = "https://twitter.com/intent/tweet?url=" + pageUrl + "&text=" + tweet;
-            socialWindow(url);
-        });
+    $(".social-share.twitter").on("click", function () {
+      url = "https://twitter.com/intent/tweet?url=" + pageUrl + "&text=" + tweet;
+      socialWindow(url);
+    });
 
-        $(".social-share.linkedin").on("click", function () {
-            url = "https://www.linkedin.com/shareArticle?mini=true&url=" + pageUrl;
-            socialWindow(url);
-        });
-    }
+    $(".social-share.linkedin").on("click", function () {
+      url = "https://www.linkedin.com/shareArticle?mini=true&url=" + pageUrl;
+      socialWindow(url);
+    });
+  }
 
 </script>

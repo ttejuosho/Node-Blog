@@ -15,32 +15,43 @@
 
     <input type="hidden" name="postCategoryValue" id="postCategoryValue" value="{{postCategory}}">
     <input type="hidden" name="postImageUrl" id="postImageUrl" value="{{postImage}}">
+    <input type="hidden" name="postTags" id="postTags" value="{{postTags}}">
 
     <label for="Category" class="sr-only">Category</label>
     <select id="postCategory" name="postCategory" class="form-control mb-2" placeholder="Category">
         <option value="">Choose Category</option>
+        {{#each PostCategories}}
+            <option value="{{postCategory}}">{{postCategory}}</option>
+        {{/each}}
     </select>
 
     <label for="Description" class="sr-only">Description</label>
-    <input type="text" class="form-control mb-2" name="postDescription" id="postDescription"
-        placeholder="Post Description" value="{{postDescription}}" required="">
+    <input type="text" class="form-control mb-2" name="postDescription" id="postDescription" placeholder="Description"
+        value="{{postDescription}}" required="">
 
     <label for="Post Image" class="sr-only">Post Image</label>
     <input type="file" id="postImage" name="postImage" class="form-control mb-2" placeholder="Post Image">
 
     <label for="Post Body" class="sr-only">Post Body</label>
-<div class="centered">
+    <div class="centered mb-6">
         <div class="document-editor__toolbar"></div>
-    <div class="row-editor">
-        <div class="postBodyDiv">{{{postBody}}}</div>
-        <div id="word-count"></div>
-        <input type="hidden" class="postBody" id="postBody" name="postBody" class="form-control" />
+        <div class="row-editor">
+            <div class="postBodyDiv">{{{postBody}}}</div>
+            <div id="word-count"></div>
+            <input type="hidden" class="postBody" id="postBody" name="postBody" class="form-control" />
+        </div>
     </div>
- </div>   
+
+    <label for="Tags" class="lead">Tags</label>
+    <select id="tags" name="tags" class="form-control mb-2" placeholder="Tags">
+        <option value="">Add Tags</option>
+        {{#each Tags}}
+        <option value="{{tag}}">{{tag}}</option>
+        {{/each}}
+    </select>
 
     <p class="mt-4">
         <a type="button" href="/profile" class="btn btn-outline-danger btn-round btn-sm my-2">Cancel</a>
-
         {{#if editMode}}
         <button type="submit" id="updatePostBtn" class="btn btn-dark btn-round btn-sm my-2 float-right">Update
             Post</button>
@@ -54,143 +65,132 @@
 </form>
 
 <script type="text/javascript">
-
-    $('#postCategory').selectize({
-        maxItems: 1,
-        create: true,
-        labelField: 'value',
-        valueField: 'value',
-        searchField: 'value',
-        render: {
-            option: function (item, escape) {
-                return '<div>' + escape(item.value) + '</div>';
-            }
-        },
-        onChange: function (value) {
-            console.log(value);
-        }
-    });
-
     $(document).ready(function () {
+        $('#postCategory').selectize({
+            maxItems: 1,
+            create: true,
+            labelField: 'value',
+            valueField: 'value',
+            searchField: 'value',
+            render: {
+                option: function (item, escape) {
+                    return '<div>' + escape(item.value) + '</div>';
+                }
+            },
+            //onChange: function (value) { console.log(value); }
+        });
+
         if ($('#postCategoryValue').val().length > 1) {
             $('#postCategory')[0].selectize.setValue($('#postCategoryValue').val());
         }
+
+        $('#tags').selectize({
+            maxItems: 10,
+            create: true,
+            labelField: 'value',
+            valueField: 'value',
+            searchField: 'value',
+            render: {
+                option: function (item, escape) {
+                    return '<div>' + escape(item.value) + '</div>';
+                }
+            },
+            //onChange: function (value) { console.log(value); }
+        });
+
+        $('#tags')[0].selectize.setValue(Object.keys($('#tags')[0].selectize.options));
     });
 
+    DecoupledDocumentEditor
+        .create(document.querySelector('.postBodyDiv'), {
+            toolbar: {
+                items: [
+                    'heading',
+                    '|',
+                    'fontSize',
+                    'fontFamily',
+                    '|',
+                    'bold',
+                    'italic',
+                    'underline',
+                    'strikethrough',
+                    'highlight',
+                    '|',
+                    'alignment',
+                    '|',
+                    'numberedList',
+                    'bulletedList',
+                    '|',
+                    'indent',
+                    'outdent',
+                    '|',
+                    'todoList',
+                    'link',
+                    'blockQuote',
+                    'imageUpload',
+                    'insertTable',
+                    'mediaEmbed',
+                    '|',
+                    'undo',
+                    'redo',
+                    //'code',
+                    'codeBlock',
+                    'horizontalLine',
+                    'MathType',
+                    'ChemType',
+                    //'pageBreak',
+                    'specialCharacters',
+                    'CKFinder'
+                ]
+            },
+            language: 'en',
+            image: {
+                toolbar: [
+                    'imageTextAlternative',
+                    'imageStyle:full',
+                    'imageStyle:side'
+                ]
+            },
+            table: {
+                contentToolbar: [
+                    'tableColumn',
+                    'tableRow',
+                    'mergeTableCells'
+                ]
+            },
+            licenseKey: '',
 
-    $('#postCategory')[0].selectize.addOption(
-        [
-            { text: "Economy", value: "Economy" }, { text: "World", value: "World" },
-            { text: "Technnology", value: "Technology" }, { text: "Culture", value: "Culture" },
-            { text: "Business", value: "Business" }, { text: "Politics", value: "Politics" },
-            { text: "Opinion", value: "Opinion" }, { text: "Science", value: "Science" },
-            { text: "Health", value: "Health" }, { text: "Style", value: "Style" },
-            { text: "Travel", value: "Travel" }, { text: "Politics", value: "Politics" },
-            { text: "Career", value: "Career" }, { text: "DIY", value: "DIY" },
-            { text: "Celebrity Gossip", value: "Celebrity Gossip" }, { text: "Sports", value: "Sports" },
-            { text: "Entertainment", value: "Entertainment" }, { text: "Shopping", value: "Shopping" },
-            { text: "Education", value: "Education" }, { text: "Fitness", value: "Fitness" },
-            { text: "History", value: "History" }, { text: "Marketing", value: "Marketing" },
-            { text: "Law", value: "Law" }, { text: "Photography", value: "Photography" },
-            { text: "Movies", value: "Movies" }, { text: "Real Estate", value: "Real Estate" },
-            { text: "Music", value: "Music" }, { text: "Car", value: "Car" },
-            { text: "Owambe", value: "Owambe" }, { text: "Fashion", value: "Fashion" },
-            { text: "Wedding", value: "Wedding" }, { text: "Money", value: "Money" },
-        ]);
-    //$('#postCategorySelectize')[0].selectize.refreshOptions();
-    //$('#postCategorySelectize')[0].selectize.addItem('Economy');
+        })
+        .then(editor => {
+            window.editor = editor;
+            // Set a custom container for the toolbar.
+            document.querySelector('.document-editor__toolbar').appendChild(editor.ui.view.toolbar.element);
+            document.querySelector('.ck-toolbar').classList.add('ck-reset_all');
+            const wordCountPlugin = editor.plugins.get('WordCount');
+            const wordCountWrapper = document.getElementById('word-count');
 
-DecoupledDocumentEditor
-			.create( document.querySelector( '.postBodyDiv' ), {
-				
-				toolbar: {
-					items: [
-						'heading',
-						'|',
-						'fontSize',
-						'fontFamily',
-						'|',
-						'bold',
-						'italic',
-						'underline',
-						'strikethrough',
-						'highlight',
-						'|',
-						'alignment',
-						'|',
-						'numberedList',
-						'bulletedList',
-						'|',
-						'indent',
-						'outdent',
-						'|',
-						'todoList',
-						'link',
-						'blockQuote',
-						'imageUpload',
-						'insertTable',
-						'mediaEmbed',
-						'|',
-						'undo',
-						'redo',
-						'code',
-						'codeBlock',
-						'horizontalLine',
-						'MathType',
-						'ChemType',
-						'pageBreak',
-						'specialCharacters',
-						'CKFinder'
-					]
-				},
-				language: 'en',
-				image: {
-					toolbar: [
-						'imageTextAlternative',
-						'imageStyle:full',
-						'imageStyle:side'
-					]
-				},
-				table: {
-					contentToolbar: [
-						'tableColumn',
-						'tableRow',
-						'mergeTableCells'
-					]
-				},
-				licenseKey: '',
-				
-			} )
-			.then( editor => {
-				window.editor = editor;		
-				// Set a custom container for the toolbar.
-				document.querySelector( '.document-editor__toolbar' ).appendChild( editor.ui.view.toolbar.element );
-				document.querySelector( '.ck-toolbar' ).classList.add( 'ck-reset_all' );
-                const wordCountPlugin = editor.plugins.get( 'WordCount' );
-                const wordCountWrapper = document.getElementById( 'word-count' );
+            wordCountWrapper.appendChild(wordCountPlugin.wordCountContainer);
 
-                wordCountWrapper.appendChild( wordCountPlugin.wordCountContainer );
-
-			} )
-			.catch( error => {
-				console.error( 'Oops, something gone wrong!' );
-				console.error( 'Please, report the following error in the https://github.com/ckeditor/ckeditor5 with the build id and the error stack trace:' );
-				console.warn( 'Build id: sp2jpcqyemqx-qatla261kib' );
-				console.error( error );
-			} );
+        })
+        .catch(error => {
+            console.error('Oops, something gone wrong!');
+            console.error('Please, report the following error in the https://github.com/ckeditor/ckeditor5 with the build id and the error stack trace:');
+            console.warn('Build id: sp2jpcqyemqx-qatla261kib');
+            console.error(error);
+        });
 
 
-$('.ck-content').keyup(()=>{
-    console.log("counting");
-    var str = $('.ck-content').text();
-    str = str.replace(/(^\s*)|(\s*$)/gi, "");
-    str = str.replace(/[ ]{2,}/gi, " ");
-    str = str.replace(/\n /, "\n");
-    console.log(str.split(' ').length);
-    //return str.split(' ').length;
-});
+    $('.ck-content').keyup(() => {
+        console.log("counting");
+        var str = $('.ck-content').text();
+        str = str.replace(/(^\s*)|(\s*$)/gi, "");
+        str = str.replace(/[ ]{2,}/gi, " ");
+        str = str.replace(/\n /, "\n");
+        console.log(str.split(' ').length);
+        //return str.split(' ').length;
+    });
 
-$('#newPostForm').keyup(()=>{
-    $('#postBody').val($('.postBodyDiv').html());
-});
+    $('#newPostForm').keyup(() => {
+        $('#postBody').val($('.postBodyDiv').html());
+    });
 </script>

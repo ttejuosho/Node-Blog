@@ -24,7 +24,7 @@
   </div>
 
 {{#if categoryView}}
-  {{#each posts}}
+  {{#each Posts}}
     <div class="row mb-2">
       <div class="col-md-12">
         <div
@@ -33,6 +33,7 @@
             <strong class="d-inline-block mb-2 text-primary">{{postCategory}}</strong>
             <h3 class="mb-0"><a href="/post/{{postId}}" class="text-dark">{{postTitle}}</a></h3>
             <p class="card-text mb-auto">{{postDescription}}</p>
+            <p>By: <a href="/@{{postAuthorUsername}}" class="text-dark">{{postAuthorName}}</a></p>
             <small class="form-text text-muted mb-2">Viewed {{viewCount}} times</small>
           </div>
           <div class="col-auto d-none d-lg-block">
@@ -156,7 +157,9 @@
       </div>
 
       <div class="p-4">
-        <h4 class="font-italic">Archives</h4>
+        <h4 class="font-italic">Latest Posts</h4>
+        {{#each LatestPosts}}
+        {{/each}}
         <ol class="list-unstyled mb-0">
           <li><a href="#">March 2014</a></li>
           <li><a href="#">February 2014</a></li>
@@ -185,27 +188,91 @@
 
   </div><!-- /.row -->
 
-<div class="modal center-modal fade" id="subscribeModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="subscribeModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+<div class="modal blurModalBg" id="subscribeModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="subscribeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title font-weight-bold" id="subscribeModalLabel">Subscribe</h5>
+        <h5 class="modal-title font-weight-bold" id="subscribeModalLabel">Subscribe to Bloget</h5>
       </div>
-      <div class="modal-body">
-            <form class="form" method="POST" action="/iForgot">
-        <h6 class="text-danger">{{error}}</h6>
-        <label for="emailAddress" class="label">Email address</label>
-        <input type="email" id="emailAddress" name="emailAddress" class="form-control" required="" autofocus="">
-
-    </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-outline-secondary">Subscribe</button>
-      </div>
+      <form id="subscribeForm" class="form" novalidate>
+        <div id="formModalBody" class="modal-body">
+          <h6 class="text-danger" id="errorMessage">{{error}}</h6>
+          <label for="subscriberName" class="label font-weight-bold">Name</label>
+          <input type="text" id="subscriberName" name="subscriberName" class="form-control" required="" autofocus="">
+          {{#if errors}}
+            {{#each errors}}
+                {{#ifEquals param "subscriberName"}}
+                    <div class="messages text-danger font-weight-bold">{{msg}}</div>
+                {{/ifEquals}}
+            {{/each}}
+          {{/if}}
+          <label for="subscriberEmail" class="label font-weight-bold mt-2">Email Address</label>
+          <input type="email" id="subscriberEmail" name="subscriberEmail" class="form-control" required="">
+          {{#if errors}}
+            {{#each errors}}
+                {{#ifEquals param "subscriberEmail"}}
+                    <div class="messages text-danger font-weight-bold">{{msg}}</div>
+                {{/ifEquals}}
+            {{/each}}
+          {{/if}}
+        </div>
+        <div id="successModalBody" class="modal-body d-none">
+          <p class="text-center m-4"><i class="fas fa-check-circle fa-2x text-success"></i><h4 class="mt-3">We got your information, we will keep in touch.</h4></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger" data-dismiss="modal" onclick="resetModal()">Close</button>
+          <button type="button" class="btn btn-outline-secondary" id="subscribeBtn" onclick="subscribe()">Subscribe</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
 
 </main><!-- /.container -->
 
+<script type="text/javascript">
+function resetModal(){
+  $('#formModalBody').removeClass('d-none');
+  $('#subscribeBtn').removeClass('d-none');
+  $('#successModalBody').addClass('d-none');
+}
+
+function subscribe (){
+
+  let subscriberData = {
+    subscriberName: $('#subscriberName').val(),
+    subscriberEmail: $('#subscriberEmail').val()
+  }
+
+  if (subscriberData.subscriberEmail.length > 1 && subscriberData.subscriberName.length > 1 ){
+      fetch("/api/bloget/subscribe", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(subscriberData),
+    }).then(response => response.json())
+      .then((data)=>{
+        if (data.response){
+          $('#subscribeForm')[0].reset();
+          $('#formModalBody').addClass('d-none');
+          $('#subscribeBtn').addClass('d-none');
+          $('#successModalBody').removeClass('d-none');
+        }
+        if (data.message){
+          $('#errorMessage').text(data.message);
+        }
+      });
+  }
+}
+
+</script>
+
+{{#if displayModal}}
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('#subscribeModal').modal({ 
+        backdrop: false,
+        show: true
+      });
+    });
+  </script>
+{{/if}}

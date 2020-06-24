@@ -1,6 +1,6 @@
 const db = require("../models");
 const {check} = require('express-validator');
-
+const {validationResult} = require('express-validator');
 module.exports = (app) => {
 
   app.get("/api/profile", (req, res) => {
@@ -262,8 +262,7 @@ module.exports = (app) => {
     if (
       req.params.subscribeTo === "user" ||
       req.params.subscribeTo === "post"
-    ) {
-      
+    ) {  
       if(req.body.subscriberEmail === ""){
         return res.json({ subscriberEmailError: "Please enter an email." });
       }
@@ -317,4 +316,37 @@ module.exports = (app) => {
     }
   });
 
+  app.post("/api/bloget/subscribe", 
+  [
+    check('subscriberEmail').not().isEmpty().isEmail().escape().withMessage('Email is required'),
+    check('subscriberName').not().isEmpty().escape().withMessage('Name is required'),
+  ]
+  ,(req,res)=>{
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      errors.subscriberEmail = req.body.subscriberEmail;
+      errors.subscriberName = req.body.subscriberName;
+      errors.displayModal = true;
+      return res.render('index', errors);
+    }
+
+    db.Subscriber.findOne({
+      where: {
+        subscriberEmail: req.body.subscriberEmail
+      }
+    }).then((dbSubscriber)=>{
+      if(dbSubscriber === null){
+        db.Subscriber.create(
+          { subscriberame: req.body.subscriberName, 
+            subscriberEmail: req.body.subscriberEmail 
+          }).then((dbSubscriber)=>{
+            res.json({ response: "We got your information, we will keep in touch." });
+          })
+      } else {
+        return res.json({ message: "Already subscribed." });
+      }
+    });
+
+
+  });
 };
