@@ -28,8 +28,21 @@ module.exports = (sequelize, DataTypes) => {
       reviewed: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+      },
+      reviewNotes: {
+        type: DataTypes.TEXT,
+        allowNull: true
       }
     });
   
+    Complaint.associate = (models) => {
+      Complaint.belongsTo(models.User, {
+        onDelete: "cascade",
+      });
+      Complaint.belongsTo(models.Post, {
+        onDelete: "cascade",
+      });
+    };
+
     return Complaint;
   };

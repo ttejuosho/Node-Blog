@@ -4,8 +4,9 @@ const sequelize = require("sequelize");
 
 // Get the new post page
 exports.newPostPage = (req, res) => {
-  return res.render("post/newPost", {
-    title: "New Post",
+  db.PostCategory.findAll({ raw: true }).then((dbPostCategory)=>{
+    var hbsObject = { PostCategory: dbPostCategory };
+    return res.render("post/newPost", hbsObject);
   });
 };
 
@@ -32,6 +33,11 @@ exports.createNewPost = (req, res) => {
 
     db.Post.create(postData)
       .then((dbPost) => {
+        req.body.tags.forEach((tag)=>{
+          db.Tag.findOrCreate({ tag: tag, PostPostId: dbPost.dataValues.postId }).catch((err)=>{
+            console.error(err);
+          });
+        });
         res.redirect("/profile");
       })
       .catch((err) => {
@@ -39,6 +45,10 @@ exports.createNewPost = (req, res) => {
       });
 
     console.log(`File uploaded successfully. || ${req.file.location}`);
+
+    console.log(req.body.tags);
+
+
   });
 };
 
@@ -62,6 +72,10 @@ exports.getPost = async (req, res) => {
             "twitter",
             "github",
           ],
+        },{
+          model: db.Tag,
+          as: "Tags",
+          attributes: ["tag"]
         },
         {
           model: db.Comment,
@@ -123,7 +137,9 @@ exports.getPost = async (req, res) => {
           postAuthorGithub: dbPost.User.dataValues.github,
           following: false,
           saved: false,
+          Tags: [],
           Comments: [],
+          SimilarPosts: []
         };
 
         for (var i = 0; i < dbPost.dataValues.Comments.length; i++) {
@@ -136,8 +152,49 @@ exports.getPost = async (req, res) => {
             dbPost.dataValues.Comments[i].User.dataValues.profileImage;
           hbsObject.Comments[i].likedByUser = false;
         }
-      }
+
+        for (var i = 0; i < dbPost.dataValues.Tags.length; i++) {
+          hbsObject.Tags.push(dbPost.dataValues.Tags[i].dataValues.tag);
+        }
+      } // TODO ELSE RETURN POST NOT FOUND
     });
+
+    // Get Similar Posts from same category (Will return 3 most viewed posts in the same category)
+    await db.Post.findAll({
+      where: {
+        postCategory: hbsObject.postCategory
+      },
+      attributes:["postId", "postTitle", "postImage"],
+      limit: 3,
+      order: [["viewCount", "DESC"]],
+      include: [
+        {
+          model: db.User,
+          as: "User",
+          attributes: [
+            "username",
+            "name",
+          ],
+        },
+      ]
+    }).then((dbSimilarPost)=>{
+      if(dbSimilarPost !== null){
+        dbSimilarPost.forEach((similarPost)=>{
+        if(similarPost.dataValues.postId !== req.params.postId){
+          var tempObj = {
+            similarPostId: similarPost.dataValues.postId,
+            similarPostTitle: similarPost.dataValues.postTitle,
+            similarPostImage: similarPost.dataValues.postImage,
+            similarPostAuthorName: similarPost.dataValues.User.dataValues.name,
+            similarPostAuthorUsername: similarPost.dataValues.User.dataValues.username
+          }
+          
+          hbsObject.SimilarPosts.push(tempObj);
+        }
+      })
+      }
+
+    })
 
     //When not signed in or another user is viewing post, ViewCount increment
     if (
@@ -172,7 +229,6 @@ exports.getPost = async (req, res) => {
           hbsObject.saved = true;
           hbsObject.savedPostId = dbSavedPost.dataValues.savedPostId;
         }
-        //return res.render("post/viewPost", hbsObject);
       });
       
       // Check if User Liked the Post
@@ -204,19 +260,13 @@ exports.getPost = async (req, res) => {
         })
       }
     }
-    //console.log(hbsObject);
+    //console.log(hbsObject.SimilarPosts);
     return res.render("post/viewPost", hbsObject);
   }
   catch(error){
     console.error(error);
   }
 }
-
-
-
-
-
-
 
 // Get a Post
 exports.getPostt = async (req, res) => {
@@ -406,6 +456,13 @@ exports.getEditPost = async (req, res, next) => {
         postId: req.params.postId,
         UserUserId: res.locals.userId,
       },
+      include: [
+        {
+          model: db.Tag,
+          as: "Tags",
+          attributes: ["tag"]
+        },
+      ]
     }).then((dbPost) => {
       if (dbPost !== null) {
         var hbsObject = {
@@ -419,9 +476,21 @@ exports.getEditPost = async (req, res, next) => {
           published: dbPost.dataValues.published,
           viewCount: dbPost.dataValues.viewCount,
           editMode: true,
+          Tags: [],
+          //PostCategories: []
         };
 
-        return res.render("post/newPost", hbsObject);
+        for (var i = 0; i < dbPost.dataValues.Tags.length; i++) {
+          hbsObject.Tags.push(dbPost.dataValues.Tags[i].dataValues);
+        }
+
+        db.PostCategory.findAll({ raw: true }).then((dbPostCategory)=>{
+          hbsObject.PostCategories = dbPostCategory;
+          return res.render("post/newPost", hbsObject);
+        });
+
+      } else {
+        return res.render("post/newPost", { error: "Post not found"});
       }
     });
   } catch (error) {
@@ -433,7 +502,7 @@ exports.getEditPost = async (req, res, next) => {
 exports.updatePost = async (req, res, next) => {
   try {
     const singleUpload = upload.single("postImage");
-    singleUpload(req, res, (err) => {
+    await singleUpload(req, res, (err) => {
       if (err) {
         return res.status(422).send({
           errors: [{ title: "Image Upload Error", detail: err.message }],
@@ -459,12 +528,20 @@ exports.updatePost = async (req, res, next) => {
             published: req.body.action === "Save Draft" ? false : true,
           };
 
+          // Delete all tags
+          db.Tag.destroy({ where: { PostPostId: req.params.postId } });
+
+          // Save new tags
+          req.body.tags.forEach((tag)=>{
+            db.Tag.create({ tag: tag, PostPostId: req.params.postId });
+          });
+
           db.Post.update(postData, {
             where: {
               postId: req.params.postId,
             },
           })
-            .then((dbPost) => {
+            .then((dbPost) => {             
               res.redirect("/profile");
             })
             .catch((err) => {

@@ -73,6 +73,7 @@ module.exports = (sequelize, DataTypes) => {
     Post.hasMany(models.SavedPost, {
       onDelete: "cascade",
     });
+    Post.hasMany(models.Complaint);
   };
 
   return Post;

@@ -166,47 +166,56 @@ exports.follow = (req, res) => {
   }
 };
 
-exports.getReportedPosts = async (req,res) => {
-  try{
-    var hbsObject = { ReportedPosts: [] };
-    var complaintsRes;
-    await db.Complaint.findAll({ raw: true },
-      ).then((dbComplaint)=>{
+exports.getReportedPostss = async (req,res) => {
+  try{ 
+    await db.Complaint.findAll({ raw: true,
+      include: [{
+        model: db.User,
+        as: "User",
+        attributes: ["userId", "username", "name"]
+      },
+      {
+        model: db.Post,
+        as: "Post",
+        attributes: ["postId","postTitle"],
+        include:[{ model: db.User, as: "User", attributes: ["userId", "username", "name"]}]
+      }] 
+    }).then((dbComplaint)=>{
       if(dbComplaint !== null){
-        complaints = dbComplaint;
+        var hbsObject = { ReportedPosts: [] };
         dbComplaint.forEach((complaint)=>{
-
           var tempObj = {
             complaintId: complaint.complaintId,
             reported: complaint.reported,
             reportedFor: complaint.reportedFor,
             reportedByUserId: complaint.reportedBy,
+            reportedByUsername: complaint['User.username'],
+            reportedByName: complaint['User.name'],
             reportedPostId: complaint.reportedPostId,
+            reportedPostTitle: complaint['Post.postTitle'],
+            reportedPostAuthorUserId: complaint['Post.User.userId'],
+            reportedPostAuthorUsername: complaint['Post.User.username'],
+            reportedPostAuthorName: complaint['Post.User.name'],
             reportedCommentId: complaint.reportedCommentId,
             reviewed: (complaint.reviewed === 0 ? false : true),
             reportedOn: complaint.createdAt
           };
 
           hbsObject.ReportedPosts.push(tempObj);
-
         });
+        res.render("admin/reported", hbsObject);
       }
     });
 
-    await hbsObject.ReportedPosts.forEach((complaint)=>{
-      var userId = complaint.reportedBy;
-      db.User.findByPk(userId).then((dbUser)=>{
-        //console.log(dbUser);
-        complaint.reportedByUsername = dbUser.dataValues.username;
-        complaint.reportedByName = dbUser.dataValues.name;
-      });
-    });
-
-    res.json(hbsObject.ReportedPosts);
-
+    //res.json(hbsObject.ReportedPosts);
+        
   }
   catch(error){
     console.error(error);
   }
 
 }
+
+exports.getReportedPosts = (req,res) => {
+  return res.render('admin/reported');
+};

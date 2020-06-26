@@ -907,4 +907,55 @@ module.exports = (app) => {
     })
     res.json(created);
   });
+
+  app.get("/api/getReportedPosts", async (req,res)=>{
+    try{ 
+      await db.Complaint.findAll({ raw: true,
+        include: [{
+          model: db.User,
+          as: "User",
+          attributes: ["userId", "username", "name"]
+        },
+        {
+          model: db.Post,
+          as: "Post",
+          attributes: ["postId","postTitle"],
+          include:[{ model: db.User, as: "User", attributes: ["userId", "username", "name"]}]
+        }] 
+      }).then((dbComplaint)=>{
+        if(dbComplaint !== null){
+          var hbsObject = { ReportedPosts: [] };
+          dbComplaint.forEach((complaint)=>{
+            var tempObj = {
+              complaintId: complaint.complaintId,
+              reported: complaint.reported,
+              reportedFor: complaint.reportedFor,
+              reportedByUserId: complaint.reportedBy,
+              reportedByUsername: complaint['User.username'],
+              reportedByName: complaint['User.name'],
+              reportedPostId: complaint.reportedPostId,
+              reportedPostTitle: complaint['Post.postTitle'],
+              reportedPostAuthorUserId: complaint['Post.User.userId'],
+              reportedPostAuthorUsername: complaint['Post.User.username'],
+              reportedPostAuthorName: complaint['Post.User.name'],
+              reportedCommentId: complaint.reportedCommentId,
+              reviewed: (complaint.reviewed === 0 ? 'No' : 'Yes'),
+              reportedOn: complaint.createdAt,
+              reviewNotes: complaint.reviewNotes
+            };
+  
+            hbsObject.ReportedPosts.push(tempObj);
+          });
+
+          res.json(hbsObject.ReportedPosts);
+        }
+      });
+  
+      //res.json(hbsObject.ReportedPosts);
+          
+    }
+    catch(error){
+      console.error(error);
+    }
+  })
 };
