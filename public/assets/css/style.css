@@ -344,3 +344,14 @@ main .ck-editor[role='application'] .ck.ck-content,
 .mb-6{
   margin-bottom: 2.5rem;
 }
+
+.tooltip-inner{
+  padding:2px 7px;
+  color:#000000;
+  text-align:center;
+  background: white;
+  border: 1px solid #000000;
+  -webkit-border-radius:9px;
+  -moz-border-radius:9px;
+  border-radius:5px;   
+}

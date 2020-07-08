@@ -25,7 +25,10 @@
                     {
                         data: 'reported',
                         className: 'reported',
-                        orderable: true
+                        orderable: true,
+                        render: function(data, type, row, meta) {
+                            return `<span class="mr-1"> ${row.reported} </span><a class="btn btn-sm" href="/post/${row.reportedPostId}" target="_blank" data-toggle="tooltip" data-placement="bottom" title="Post Title: ${row.reportedPostTitle}"><i class="fas fa-external-link-alt"></i></a>`;
+                        }
                     },
                     {
                         data: 'reportedFor',
@@ -63,6 +66,9 @@
                         className: 'reviewNotes'
                     }
                 ]
+            });
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip();
             });
         });
     });
