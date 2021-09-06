@@ -1,4 +1,5 @@
 const db = require("../models");
+
 module.exports = (app) => {
   // Get a User by ID
   app.get("/api/users/id/:userId", (req, res) => {
@@ -43,7 +44,7 @@ module.exports = (app) => {
   app.get("/api/users", (req, res) => {
     db.User.findAll({
       attributes: {
-        exclude: ["password"],
+        exclude: ["password", "resetPasswordToken", "resetPasswordExpires"],
       },
     }).then(function (dbUser) {
       res.json(dbUser);
@@ -57,7 +58,7 @@ module.exports = (app) => {
         username: req.params.username,
       },
       attributes: {
-        exclude: ["password"],
+        exclude: ["password", "resetPasswordToken", "resetPasswordExpires"],
       },
       include: [
         {

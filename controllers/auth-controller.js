@@ -6,7 +6,6 @@ const bCrypt = require('bcrypt-nodejs');
 const crypto = require('crypto');
 const sendEmail = require('../services/email/email.js');
 
-
 // Render Signin page
 exports.getSigninPage = (req, res) => {
   return res.render("auth/auth", {
@@ -371,11 +370,7 @@ exports.sessionUserId = function (req, res) {
   console.log(sessionUser.cookie, " ======Cookie=====");
   console.log(sessionUser.passport.user, " ======Logged in User UUID=====");
 
-  db.User.findAll({
-    where: {
-      userId: req.session.passport.user,
-    },
-  }).then(function (dbUser) {
+  db.User.findByPk(req.session.passport.user).then(function (dbUser) {
     res.json(dbUser);
   });
 };

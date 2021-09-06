@@ -13,12 +13,9 @@ module.exports = function(app) {
     ], Security.isLoggedIn , postController.createNewPost);
 
     app.get('/post/:postId', postController.getPost);
-
     app.get('/post/edit/:postId', Security.isLoggedIn, postController.getEditPost);
     app.post('/post/edit/:postId', postController.updatePost);
-
     app.get('/post/delete/:postId', postController.deletePost);
-
     app.get('/post/publish/:postId', postController.publishPost);
     app.get('/post/unpublish/:postId', postController.unpublishPost);
     app.get('/post/getcomments/:postId', postController.getCommentsPage);

@@ -113,7 +113,6 @@ require("./routes/user-api-routes")(app);
 require("./routes/post-api-routes")(app);
 require("./routes/auth-api-routes")(app);
 require("./routes/home-api-routes")(app);
-
 require("./routes/user-routes")(app);
 require("./routes/post-routes")(app);
 require("./routes/auth-routes")(app);

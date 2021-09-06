@@ -9,12 +9,8 @@ exports.getHomePage = async (req, res) => {
     attributes: [sequelize.fn("MAX", sequelize.literal("viewCount"))],
     //order: [['groupId', 'DESC'], ['value', 'DESC']]
   }).then((dbPost) => {
-    console.log(dbPost);
     return res.render("index");
   });
-  // return res.render("index", {
-  //   title: "TaiBlog",
-  // });
 };
 
 exports.getPostsByCategory = (req, res) => {

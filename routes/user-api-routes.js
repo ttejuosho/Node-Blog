@@ -1,8 +1,8 @@
 const db = require("../models");
 const {check} = require('express-validator');
 const {validationResult} = require('express-validator');
-module.exports = (app) => {
 
+module.exports = (app) => {
   app.get("/api/profile", (req, res) => {
     db.User.findByPk(req.user.userId, {
       attributes: {
