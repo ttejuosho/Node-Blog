@@ -34,7 +34,10 @@ exports.createNewPost = (req, res) => {
     db.Post.create(postData)
       .then((dbPost) => {
         req.body.tags.forEach((tag)=>{
-          db.Tag.findOrCreate({ tag: tag, PostPostId: dbPost.dataValues.postId }).catch((err)=>{
+          db.Tag.findOrCreate(
+            { 
+              where: { PostPostId: dbPost.dataValues.postId, tag: tag } 
+            }).catch((err)=>{
             console.error(err);
           });
         });
@@ -45,10 +48,7 @@ exports.createNewPost = (req, res) => {
       });
 
     console.log(`File uploaded successfully. || ${req.file.location}`);
-
     console.log(req.body.tags);
-
-
   });
 };
 

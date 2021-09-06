@@ -6,7 +6,7 @@ const sendEmail = function(emailBody, subject, recipients) {
     port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
-      user: 'ttejuosho@aol.com', // user
+      user: process.env.EMAIL_ADDRESS, // user
       pass: process.env.EMAIL_PASSWORD, // password
     },
     tls: {
@@ -20,7 +20,7 @@ const sendEmail = function(emailBody, subject, recipients) {
   // }));
 
   const mailOptions = {
-    from: '"Taiwo\'s Blog" <ttejuosho@aol.com>', // sender address
+    from: `"Taiwo\'s Blog" <${process.env.EMAIL_ADDRESS}>`, // sender address
     to: recipients, // list of receivers
     subject: subject, // Subject line
     // text: 'Hello world?', // plain text body
