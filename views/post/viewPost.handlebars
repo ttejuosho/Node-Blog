@@ -18,16 +18,16 @@
           {{#unless isOwner}}
           {{#unless saved}}
           <span id="savePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Save post"
-            onclick="reactTo(`post`,`save`, `{{postId}}`)"><i class="far fa-save fa-2x mr-2"></i>
+            onclick="reactTo(`{{counter @index}}`,`post`,`save`, `{{postId}}`)"><i class="far fa-save fa-2x mr-2"></i>
           </span>
           {{else}}
           <span id="unsavePost" class="mr-3 pointer" data-toggle="tooltip" data-placement="bottom" title="Unsave post"
-            onclick="reactTo(`post`,`unsave`, `{{savedPostId}}`)"><i class="fas fa-save fa-2x mr-2"></i>
+            onclick="reactTo(`{{counter @index}}`,`post`,`unsave`, `{{savedPostId}}`)"><i class="fas fa-save fa-2x mr-2"></i>
           </span>
           {{/unless}}
           {{/unless}}
           <span id="thumbsUp" class="mr-2 pointer" data-toggle="tooltip" data-placement="bottom" title="Like post"
-            onclick="reactTo(`post`,`like`, `{{postId}}`)">
+            onclick="reactTo(`{{counter @index}}`,`post`,`like`, `{{postId}}`)">
             {{#if likedByUser}}
             <i class="fas fa-thumbs-up fa-2x mr-2"></i>
             {{else}}
@@ -36,7 +36,7 @@
             <small class="likesCount text-success">{{likesCount}}</small>
           </span>
           <span id="thumbsDown" class="pointer" data-toggle="tooltip" data-placement="bottom" title="Dislike post"
-            onclick="reactTo(`post`,`dislike`, `{{postId}}`)">
+            onclick="reactTo(`{{counter @index}}`,`post`,`dislike`, `{{postId}}`)">
             <i class="far fa-thumbs-down fa-2x mr-2"></i>
             <small class="dislikesCount text-danger mr-2">{{dislikesCount}}</small>
           </span>
