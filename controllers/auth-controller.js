@@ -5,9 +5,13 @@ const {validationResult} = require('express-validator');
 const bCrypt = require('bcrypt-nodejs');
 const crypto = require('crypto');
 const sendEmail = require('../services/email/email.js');
+const { lookup } = require('geoip-lite');
 
 // Render Signin page
 exports.getSigninPage = (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  console.log(ip); // ip address of the user
+  console.log(lookup(ip)); // location of the user
   return res.render("auth/auth", {
     title: "Sign In",
     layout: "partials/prelogin",
